@@ -21,7 +21,22 @@ def detect():
 @cli.command()
 def lint():
     """Run all harness checks."""
-    click.echo("lint: not implemented")
+    from ai_harness.lint import run_lint
+    results = run_lint(Path.cwd())
+
+    failed = [r for r in results if not r.passed]
+    passed = [r for r in results if r.passed]
+    total_ms = sum(r.duration_ms for r in results)
+
+    for r in results:
+        icon = "PASS" if r.passed else "FAIL"
+        click.echo(f"  {icon}  {r.name} ({r.duration_ms}ms)")
+        if not r.passed and r.error:
+            for line in r.error.strip().splitlines():
+                click.echo(f"       {line}")
+
+    click.echo(f"\n{len(passed)} passed, {len(failed)} failed ({total_ms}ms)")
+    raise SystemExit(1 if failed else 0)
 
 @cli.command()
 def fix():
