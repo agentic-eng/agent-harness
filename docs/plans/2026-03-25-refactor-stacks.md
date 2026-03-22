@@ -61,14 +61,68 @@ REQUIRES: <External tool(s) needed>
 
 The file IS the documentation. An agent reading the file understands everything — no external docs needed. When a user challenges a check, the agent reads the docstring and cites the WHY.
 
+## Three test layers
+
+| Layer | What it tests | How to run | Files |
+|---|---|---|---|
+| **Rego unit tests** | Policy logic with mock input | `conftest verify -p policies/` | `policies/**/*_test.rego` |
+| **Fixture integration tests** | Policies against real Dockerfiles/compose | `conftest test tests/fixtures/...` | `tests/fixtures/**` |
+| **Python unit tests** | Check modules (subprocess, fallback, skip) | `uv run pytest tests/` | `tests/stacks/**` |
+
+Every Rego policy gets a `_test.rego` sibling:
+
+```
+policies/
+  dockerfile/
+    layers.rego              # The policy
+    layers_test.rego          # Rego unit test — mock input, assert deny/no-deny
+    cache.rego
+    cache_test.rego
+    ...
+  compose/
+    images.rego
+    images_test.rego
+    ...
+```
+
+Rego unit test example:
+```rego
+package dockerfile.layers_test
+
+import data.dockerfile.layers
+
+test_broad_copy_before_deps {
+    layers.deny with input as [
+        {"Cmd": "from", "Value": ["python:3.12"], "Flags": [], "Stage": 0, "SubCmd": ""},
+        {"Cmd": "copy", "Value": [".", "."], "Flags": [], "Stage": 0, "SubCmd": ""},
+        {"Cmd": "run", "Value": ["uv sync"], "Flags": [], "Stage": 0, "SubCmd": ""},
+    ]
+}
+
+test_correct_order_passes {
+    count(layers.deny) == 0 with input as [
+        {"Cmd": "from", "Value": ["python:3.12"], "Flags": [], "Stage": 0, "SubCmd": ""},
+        {"Cmd": "copy", "Value": ["pyproject.toml", "./"], "Flags": [], "Stage": 0, "SubCmd": ""},
+        {"Cmd": "run", "Value": ["uv sync"], "Flags": ["--mount=type=cache,target=/root/.cache/uv"], "Stage": 0, "SubCmd": ""},
+        {"Cmd": "copy", "Value": ["src/", "./src/"], "Flags": [], "Stage": 0, "SubCmd": ""},
+    ]
+}
+```
+
+Fixture integration tests stay in `tests/fixtures/` — real files that conftest runs against. These test the full pipeline (parser + policy), while Rego unit tests test policy logic in isolation.
+
 ## Tasks
 1. Rename ai_harness → agent_harness (module name, imports, pyproject.toml)
 2. Create stacks/ directory structure
 3. Move checks into per-stack directories (one file per check, with WHAT/WHY/WITHOUT IT/FIX docstrings)
-4. Move tests to mirror structure (one test file per check file)
-5. Update lint.py to discover checks from stacks/
-6. Update all imports
-7. Move config templates from K skill's python.md/docker.md into per-stack templates.py
-8. Verify all tests pass
-9. Test on aggre
-10. Strip K skill's python.md and docker.md to guidance-only (non-deterministic advice)
+4. Write Rego unit tests (`*_test.rego`) for all 15 policy files
+5. Move Python tests to mirror stacks/ structure (one test file per check file)
+6. Update lint.py to discover checks from stacks/
+7. Update all imports
+8. Move config templates from K skill's python.md/docker.md into per-stack templates.py
+9. Verify all three test layers pass:
+   - `conftest verify -p policies/`
+   - `conftest test tests/fixtures/dockerfile/*.Dockerfile --parser dockerfile -p policies/dockerfile/ --all-namespaces`
+   - `uv run pytest tests/ -v`
+10. Test on aggre
+11. Strip K skill's python.md and docker.md to guidance-only (non-deterministic advice)
