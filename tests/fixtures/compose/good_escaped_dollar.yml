@@ -1,0 +1,14 @@
+# GOOD: properly escaped $$ and ${VAR} references
+# Expected: no deny
+services:
+  app:
+    image: ghcr.io/myorg/app:main-abc1234
+    restart: unless-stopped
+    environment:
+      PASSWORD: "$$2a$$12$$LJ3m4ys1234abcdef"
+      DB_HOST: "${DB_HOST}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

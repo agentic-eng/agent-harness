@@ -1,0 +1,10 @@
+# BAD: long-running service without restart policy
+# Expected: deny — "missing 'restart:' policy"
+services:
+  app:
+    image: ghcr.io/myorg/app:main-abc1234
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

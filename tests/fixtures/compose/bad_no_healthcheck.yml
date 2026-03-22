@@ -1,0 +1,6 @@
+# BAD: long-running service without healthcheck
+# Expected: deny — "missing 'healthcheck:'"
+services:
+  app:
+    image: ghcr.io/myorg/app:main-abc1234
+    restart: unless-stopped

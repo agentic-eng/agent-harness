@@ -1,0 +1,11 @@
+# BAD: mutable tag without pull_policy
+# Expected: deny — "mutable tag requires 'pull_policy: always'"
+services:
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

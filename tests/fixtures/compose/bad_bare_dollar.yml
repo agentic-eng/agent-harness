@@ -1,0 +1,13 @@
+# BAD: bare $ in environment value (bcrypt hash)
+# Expected: deny — "contains bare '$'"
+services:
+  app:
+    image: ghcr.io/myorg/app:main-abc1234
+    restart: unless-stopped
+    environment:
+      PASSWORD: "$2a$12$LJ3m4ys1234abcdef"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

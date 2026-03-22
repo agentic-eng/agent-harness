@@ -1,0 +1,14 @@
+services:
+  myapp:
+    image: myorg/myapp:1.0
+    networks: [dokploy-network]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  dokploy-network:
+    external: true

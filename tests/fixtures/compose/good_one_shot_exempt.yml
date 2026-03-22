@@ -1,0 +1,18 @@
+# GOOD: one-shot service (migrate) is exempt from healthcheck and restart
+# Expected: no deny
+services:
+  app:
+    image: ghcr.io/myorg/app:main-abc1234
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  migrate:
+    image: ghcr.io/myorg/app:main-abc1234
+    command: ["python", "-m", "alembic", "upgrade", "head"]

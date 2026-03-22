@@ -1,0 +1,6 @@
+# BAD: has build directive
+# Expected: deny — "has 'build:' directive"
+services:
+  app:
+    build: .
+    image: ghcr.io/myorg/app:main-abc1234
