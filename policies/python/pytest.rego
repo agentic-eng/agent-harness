@@ -16,8 +16,8 @@ package python.pytest
 # WITHOUT IT: Phantom test markers that select nothing, opaque dot-based
 # output, and coverage gaps discovered only in CI.
 #
-# FIX: Set addopts = "-v --strict-markers --cov --cov-fail-under=95" in
-# [tool.pytest.ini_options].
+# FIX: Set addopts = "-v --strict-markers --cov --cov-fail-under=90" in
+# [tool.pytest.ini_options]. 90% is the minimum floor; 95% is recommended.
 #
 # Input: parsed pyproject.toml (TOML -> JSON)
 
@@ -53,10 +53,27 @@ deny contains msg if {
 }
 
 # ── Policy: coverage fail-under threshold ──
+# Must exist AND be at least 90%. 95% is recommended but 90% is the floor.
 
 deny contains msg if {
 	opts := input.tool.pytest.ini_options
 	addopts := opts.addopts
 	not contains(addopts, "--cov-fail-under")
-	msg := "pytest: addopts missing '--cov-fail-under' — set a coverage threshold (recommended: 95)"
+	msg := "pytest: addopts missing '--cov-fail-under' — set a coverage threshold (minimum: 90, recommended: 95)"
+}
+
+deny contains msg if {
+	opts := input.tool.pytest.ini_options
+	addopts := opts.addopts
+	contains(addopts, "--cov-fail-under")
+
+	# Extract the number after --cov-fail-under=
+	some i
+	parts := split(addopts, "--cov-fail-under=")
+	count(parts) > 1
+	threshold_str := split(parts[1], " ")[0]
+	threshold := to_number(threshold_str)
+	threshold < 90
+
+	msg := sprintf("pytest: --cov-fail-under=%v is below minimum 90%% — agents need meaningful coverage gates to catch regressions", [threshold])
 }
