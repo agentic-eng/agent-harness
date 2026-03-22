@@ -68,7 +68,6 @@ deny contains msg if {
 	contains(addopts, "--cov-fail-under")
 
 	# Extract the number after --cov-fail-under=
-	some i
 	parts := split(addopts, "--cov-fail-under=")
 	count(parts) > 1
 	threshold_str := split(parts[1], " ")[0]
