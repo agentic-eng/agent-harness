@@ -1,5 +1,6 @@
 from pathlib import Path
 from agent_harness.config import load_config
+from agent_harness.exclusions import get_excluded_patterns
 from agent_harness.runner import CheckResult
 from agent_harness.stacks.universal.yamllint_check import run_yamllint
 from agent_harness.stacks.universal.conftest_json_check import run_conftest_json
@@ -15,12 +16,13 @@ from agent_harness.stacks.docker.conftest_compose_check import run_conftest_comp
 
 def run_lint(project_dir: Path) -> list[CheckResult]:
     config = load_config(project_dir)
+    exclude = get_excluded_patterns(config.exclude)
     results: list[CheckResult] = []
 
     # Universal checks
     results.append(run_conftest_gitignore(project_dir))
-    results.append(run_conftest_json(project_dir))
-    results.append(run_yamllint(project_dir))
+    results.append(run_conftest_json(project_dir, exclude_patterns=exclude))
+    results.append(run_yamllint(project_dir, exclude_patterns=exclude))
 
     # Python checks
     if "python" in config.stacks:

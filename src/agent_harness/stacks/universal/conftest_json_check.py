@@ -21,10 +21,23 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+from agent_harness.exclusions import is_excluded
 from agent_harness.runner import CheckResult, run_check
 
+JSONC_FILES = {"tsconfig.json", "jsconfig.json"}
+JSONC_DIRS = {".vscode"}
 
-def run_conftest_json(project_dir: Path) -> CheckResult:
+
+def _is_jsonc(filepath: str) -> bool:
+    """Check if a JSON file is actually JSONC (JSON with comments)."""
+    basename = filepath.split("/")[-1]
+    if basename in JSONC_FILES:
+        return True
+    parts = filepath.split("/")
+    return any(d in JSONC_DIRS for d in parts[:-1])
+
+
+def run_conftest_json(project_dir: Path, exclude_patterns: list[str] | None = None) -> CheckResult:
     """Validate JSON files via conftest parse --parser json."""
     name = "conftest-json"
     try:
@@ -38,6 +51,11 @@ def run_conftest_json(project_dir: Path) -> CheckResult:
         json_files = [f for f in result.stdout.strip().splitlines() if f]
     except (subprocess.TimeoutExpired, FileNotFoundError):
         json_files = []
+
+    # Filter JSONC and excluded files
+    json_files = [f for f in json_files if not _is_jsonc(f)]
+    if exclude_patterns:
+        json_files = [f for f in json_files if not is_excluded(f, exclude_patterns)]
 
     if not json_files:
         return CheckResult(
