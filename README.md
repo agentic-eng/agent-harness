@@ -86,6 +86,34 @@ docker:
 | `init` | Scaffold harness config files onto a project |
 | `audit` | Audit harness completeness — shows what's missing and how to fix it |
 
+## For AI agents: how to use this
+
+Every Rego policy file contains a structured comment block:
+
+```
+# WHAT: What this rule checks
+# WHY: Why it matters for AI agents
+# WITHOUT IT: What breaks in practice
+# FIX: How to resolve the violation
+```
+
+### The agent workflow
+
+1. **On lint failure:** `agent-harness lint` reports which rules failed with actionable messages.
+2. **Agent fixes automatically** — most failures have clear fixes (add USER, add healthcheck, set output-format).
+3. **If the user challenges a rule** ("ignore that, it doesn't apply"): read the WHY block from the `.rego` file and explain it to the user before suppressing. The WHY is the agent's argument.
+4. **If the user still wants to suppress:** that's their call, but the agent informed them of the risk.
+
+### Never ignore silently
+
+When a check fails, agents should:
+- Read the error message (it's actionable — "add healthcheck", "set output-format to concise")
+- Fix it
+- If unsure, read the `.rego` file's WHY block for context
+- If the user says "skip it," cite the WHY and WITHOUT IT before proceeding
+
+The policies exist because agents make these specific mistakes. The WHY explains which mistake and what breaks.
+
 ## Philosophy: what is a harness?
 
 A harness is a set of deterministic controls that produce pass/fail verdicts without human judgment. Not best practices. Not guidelines. Not conventions. Tools that run the same way every time, return the same result for the same input, and tell the agent exactly what's wrong.
