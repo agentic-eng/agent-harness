@@ -20,6 +20,7 @@ class DockerConfig:
 @dataclass
 class HarnessConfig:
     stacks: set[str] = field(default_factory=set)
+    exclude: list[str] = field(default_factory=list)
     python: PythonConfig = field(default_factory=PythonConfig)
     docker: DockerConfig = field(default_factory=DockerConfig)
 
@@ -31,6 +32,8 @@ def load_config(project_dir: Path) -> HarnessConfig:
         raw = yaml.safe_load(cfg_path.read_text()) or {}
         if "stacks" in raw:
             config.stacks = set(raw["stacks"])
+        if "exclude" in raw:
+            config.exclude = list(raw["exclude"])
         if "python" in raw:
             for k, v in raw["python"].items():
                 if hasattr(config.python, k):
