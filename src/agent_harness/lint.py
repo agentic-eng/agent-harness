@@ -1,15 +1,16 @@
 from pathlib import Path
-from ai_harness.config import load_config
-from ai_harness.runner import CheckResult
-from ai_harness.checks.conftest import (
-    run_conftest_dockerfile, run_conftest_compose,
-    run_conftest_python, run_conftest_gitignore, run_conftest_json,
-)
-from ai_harness.checks.hadolint import run_hadolint
-from ai_harness.checks.yamllint_check import run_yamllint
-from ai_harness.checks.ruff import run_ruff
-from ai_harness.checks.ty import run_ty
-from ai_harness.checks.file_length import run_file_length
+from agent_harness.config import load_config
+from agent_harness.runner import CheckResult
+from agent_harness.stacks.universal.yamllint_check import run_yamllint
+from agent_harness.stacks.universal.conftest_json_check import run_conftest_json
+from agent_harness.stacks.universal.conftest_gitignore_check import run_conftest_gitignore
+from agent_harness.stacks.python.ruff_check import run_ruff
+from agent_harness.stacks.python.ty_check import run_ty
+from agent_harness.stacks.python.conftest_python_check import run_conftest_python
+from agent_harness.stacks.python.file_length_check import run_file_length
+from agent_harness.stacks.docker.hadolint_check import run_hadolint
+from agent_harness.stacks.docker.conftest_dockerfile_check import run_conftest_dockerfile
+from agent_harness.stacks.docker.conftest_compose_check import run_conftest_compose
 
 
 def run_lint(project_dir: Path) -> list[CheckResult]:

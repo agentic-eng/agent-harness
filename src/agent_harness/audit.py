@@ -2,8 +2,8 @@ from __future__ import annotations
 from pathlib import Path
 from dataclasses import dataclass
 import shutil
-from ai_harness.detect import detect_stacks
-from ai_harness.config import load_config
+from agent_harness.detect import detect_stacks
+from agent_harness.config import load_config
 
 
 @dataclass
@@ -37,9 +37,9 @@ def run_audit(project_dir: Path) -> list[AuditItem]:
 
     # ── Config files ──
     configs = {
-        ".harness.yml": "Run: ai-harness init",
-        ".yamllint.yml": "Run: ai-harness init",
-        ".pre-commit-config.yaml": "Run: ai-harness init",
+        ".harness.yml": "Run: agent-harness init",
+        ".yamllint.yml": "Run: agent-harness init",
+        ".pre-commit-config.yaml": "Run: agent-harness init",
     }
     for filename, fix in configs.items():
         path = project_dir / filename
@@ -67,7 +67,7 @@ def run_audit(project_dir: Path) -> list[AuditItem]:
     if "python" in stacks:
         pyproject = project_dir / "pyproject.toml"
         if pyproject.exists():
-            from ai_harness.checks.conftest import run_conftest_python
+            from agent_harness.stacks.python.conftest_python_check import run_conftest_python
 
             result = run_conftest_python(project_dir)
             if result.passed:
@@ -84,7 +84,7 @@ def run_audit(project_dir: Path) -> list[AuditItem]:
     # ── .gitignore ──
     gitignore = project_dir / ".gitignore"
     if gitignore.exists():
-        from ai_harness.checks.conftest import run_conftest_gitignore
+        from agent_harness.stacks.universal.conftest_gitignore_check import run_conftest_gitignore
 
         result = run_conftest_gitignore(project_dir)
         if result.passed:

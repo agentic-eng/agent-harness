@@ -1,4 +1,4 @@
-from ai_harness.runner import run_check
+from agent_harness.runner import run_check
 
 
 def test_run_check_success():

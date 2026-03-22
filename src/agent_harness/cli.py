@@ -1,4 +1,4 @@
-# src/ai_harness/cli.py
+# src/agent_harness/cli.py
 import click
 from pathlib import Path
 
@@ -10,7 +10,7 @@ def cli():
 @cli.command()
 def detect():
     """Detect project stacks (Python, Docker, etc.)."""
-    from ai_harness.detect import detect_stacks
+    from agent_harness.detect import detect_stacks
     stacks = detect_stacks(Path.cwd())
     if stacks:
         for stack in sorted(stacks):
@@ -39,15 +39,15 @@ def print_results(results) -> int:
 @cli.command()
 def lint():
     """Run all harness checks."""
-    from ai_harness.lint import run_lint
+    from agent_harness.lint import run_lint
     results = run_lint(Path.cwd())
     raise SystemExit(print_results(results))
 
 @cli.command()
 def fix():
     """Auto-fix what's fixable, then lint."""
-    from ai_harness.fix import run_fix
-    from ai_harness.lint import run_lint
+    from agent_harness.fix import run_fix
+    from agent_harness.lint import run_lint
 
     click.echo("Fixing...")
     actions = run_fix(Path.cwd())
@@ -61,16 +61,16 @@ def fix():
 @cli.command()
 def init():
     """Initialize harness on a project."""
-    from ai_harness.init.scaffold import scaffold_project
+    from agent_harness.init.scaffold import scaffold_project
     actions = scaffold_project(Path.cwd())
     for action in actions:
         click.echo(f"  {action}")
-    click.echo("\nHarness initialized. Run 'ai-harness lint' to check.")
+    click.echo("\nHarness initialized. Run 'agent-harness lint' to check.")
 
 @cli.command()
 def audit():
     """Audit harness configuration — shows what's missing and how to fix it."""
-    from ai_harness.audit import run_audit
+    from agent_harness.audit import run_audit
 
     items = run_audit(Path.cwd())
 
@@ -92,5 +92,5 @@ def audit():
 
     click.echo(f"\n{len(ok)} ok, {len(issues)} issues")
     if issues:
-        click.echo("\nRun 'ai-harness init' to fix missing config files.")
+        click.echo("\nRun 'agent-harness init' to fix missing config files.")
     raise SystemExit(1 if issues else 0)

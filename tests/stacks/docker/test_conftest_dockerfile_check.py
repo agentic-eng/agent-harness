@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ai_harness.checks.conftest import run_conftest_dockerfile
+from agent_harness.stacks.docker.conftest_dockerfile_check import run_conftest_dockerfile
 
 
 def test_conftest_dockerfile_good(tmp_path):

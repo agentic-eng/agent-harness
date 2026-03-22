@@ -1,5 +1,5 @@
 from pathlib import Path
-from ai_harness.detect import detect_stacks
+from agent_harness.detect import detect_stacks
 
 
 def test_detect_python(tmp_path):

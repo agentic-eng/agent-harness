@@ -1,5 +1,5 @@
 from click.testing import CliRunner
-from ai_harness.cli import cli
+from agent_harness.cli import cli
 
 
 def test_lint_empty_project(tmp_path, monkeypatch):

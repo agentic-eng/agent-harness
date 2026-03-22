@@ -1,5 +1,5 @@
 from pathlib import Path
-from ai_harness.config import load_config
+from agent_harness.config import load_config
 
 
 def test_load_config_from_file(tmp_path):

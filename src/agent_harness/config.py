@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 import yaml
-from ai_harness.detect import detect_stacks
+from agent_harness.detect import detect_stacks
 
 
 @dataclass

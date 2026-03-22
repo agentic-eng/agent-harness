@@ -1,6 +1,6 @@
 from pathlib import Path
-from ai_harness.detect import detect_stacks
-from ai_harness.init.templates import HARNESS_YML, YAMLLINT_YML, PRECOMMIT_YML
+from agent_harness.detect import detect_stacks
+from agent_harness.init.templates import HARNESS_YML, YAMLLINT_YML, PRECOMMIT_YML
 
 def scaffold_project(project_dir: Path) -> list[str]:
     """Write harness config files. Returns list of actions taken."""

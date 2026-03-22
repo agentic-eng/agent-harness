@@ -1,6 +1,27 @@
+"""
+YAML lint check.
+
+WHAT: Runs yamllint on all git-tracked YAML files with a bundled or project
+config.
+
+WHY: Agents generate YAML with inconsistent indentation, overly long lines,
+duplicate keys, and truthy value issues. YAML syntax errors are especially
+dangerous because they often parse without error but produce wrong data
+structures (e.g., `on` becomes boolean `true`).
+
+WITHOUT IT: Broken CI pipelines from malformed YAML, silent config errors from
+duplicate keys (last one wins), and truthy/falsy surprises in GitHub Actions
+and docker-compose files.
+
+FIX: Fix the YAML issues reported by yamllint. Common fixes: consistent
+indentation, quote strings that look like booleans, remove duplicate keys.
+
+REQUIRES: yamllint (via PATH)
+"""
 from pathlib import Path
 import tempfile
-from ai_harness.runner import run_check, CheckResult
+
+from agent_harness.runner import run_check, CheckResult
 import subprocess
 
 YAMLLINT_CONFIG = """\

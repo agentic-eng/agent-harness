@@ -1,6 +1,6 @@
 # tests/test_init.py
 from pathlib import Path
-from ai_harness.init.scaffold import scaffold_project
+from agent_harness.init.scaffold import scaffold_project
 
 def test_scaffold_creates_files(tmp_path):
     (tmp_path / "pyproject.toml").write_text("[project]\nname='x'")
