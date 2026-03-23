@@ -10,6 +10,16 @@
 - JSON file validation via conftest parse
 - Tested on real project (aggre), <1s execution
 
+## Done (v0.1.1 — JS stack + universal fixes)
+
+- **JavaScript/TypeScript stack** — Biome lint+format, framework-aware type checking (astro check > next lint > tsc), package.json Rego policies (engines, type:module, no wildcards)
+- **File exclusion system** — `exclude:` in config + built-in defaults (lock files, build output, node_modules, archives). Wired into yamllint, conftest-json, file-length.
+- **Stack-conditional gitignore** — .env universal, .venv/__pycache__ Python-only, node_modules/dist JS-only. No more false positives on wrong stacks.
+- **JSONC skipping** — tsconfig.json, jsconfig.json, .vscode/ skipped by conftest-json
+- **Extension-aware file length** — .py/.ts/.js: 500, .astro/.vue/.svelte: 800. Moved from Python-only to universal.
+- **Biome VCS integration** — respects .gitignore via --vcs-enabled, skips dist/, .astro/, node_modules/
+- Tested on real JS project (iorlas.com Astro blog), 60 Python tests + 73 Rego tests
+
 ## Next (v0.2)
 
 - Publish to PyPI as `agent-harness`
@@ -22,7 +32,6 @@
 
 ## Future (v0.3+)
 
-- JavaScript/TypeScript stack module (eslint, prettier, vitest, tsc)
 - Go stack module (golangci-lint, go test, go vet)
 - `agent-harness upgrade` — pull latest policies without reinstalling
 - Policy bundle versioning — pin and bump policy versions per project

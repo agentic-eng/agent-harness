@@ -28,6 +28,8 @@ def run_audit(project_dir: Path) -> list[AuditItem]:
     if "python" in stacks:
         tools["ruff"] = "uv add ruff --dev"
         tools["ty"] = "uv add ty --dev"
+    if "javascript" in stacks:
+        tools["biome"] = "npm install --save-dev @biomejs/biome"
 
     for tool, install_cmd in tools.items():
         if shutil.which(tool):
@@ -81,12 +83,24 @@ def run_audit(project_dir: Path) -> list[AuditItem]:
         if not dockerfile.exists():
             items.append(AuditItem(area="docker", status="missing", message="No Dockerfile", fix="Create Dockerfile"))
 
+    # ── JavaScript-specific ──
+    if "javascript" in stacks:
+        pkg = project_dir / "package.json"
+        if pkg.exists():
+            from agent_harness.stacks.javascript.conftest_package_check import run_conftest_package
+
+            result = run_conftest_package(project_dir)
+            if result.passed:
+                items.append(AuditItem(area="javascript", status="ok", message="package.json harness config correct"))
+            else:
+                items.append(AuditItem(area="javascript", status="misconfigured", message="package.json issues", fix=result.output or result.error))
+
     # ── .gitignore ──
     gitignore = project_dir / ".gitignore"
     if gitignore.exists():
         from agent_harness.stacks.universal.conftest_gitignore_check import run_conftest_gitignore
 
-        result = run_conftest_gitignore(project_dir)
+        result = run_conftest_gitignore(project_dir, stacks=stacks)
         if result.passed:
             items.append(AuditItem(area="gitignore", status="ok", message=".gitignore has required entries"))
         else:

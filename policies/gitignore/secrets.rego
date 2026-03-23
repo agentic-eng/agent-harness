@@ -1,33 +1,61 @@
 package gitignore.secrets
 
-# GITIGNORE — secrets and artifacts must be excluded
+# GITIGNORE — secrets and artifacts must be excluded, per detected stack
 #
-# WHAT: Ensures .env, .venv, and __pycache__ are listed in .gitignore.
+# WHAT: Ensures .env is always gitignored, plus stack-specific entries
+# (.venv/__pycache__ for Python, node_modules/dist for JS).
 #
-# WHY: Agents create .env files with real secrets during development and
-# commit them. .venv and __pycache__ bloat the repo and slow git operations.
-# Once secrets are in git history, they require history rewriting to remove.
+# WHY: Agents create .env files with real secrets. Stack-specific artifacts
+# (.venv, node_modules) bloat repos. Without stack awareness, Python entries
+# get flagged on JS projects (false positives) and JS entries get missed on
+# JS projects (false negatives).
 #
-# WITHOUT IT: Secrets in git history (extractable forever), 500MB repos from
-# committed venvs, and slow clones on every CI run.
+# WITHOUT IT: Secrets in git history, false positive noise on wrong stacks,
+# missing entries for detected stacks.
 #
-# FIX: Add .env, .venv, and __pycache__ to .gitignore.
+# FIX: Add the reported entries to .gitignore.
 #
 # Input: array of [{Kind, Value, Original}] entries
-# Parser: --parser ignore
+# Data: {stacks: ["python", "javascript", ...]} passed via --data
 
 import rego.v1
 
-# Critical entries that must be in .gitignore
-required_patterns := [".env", ".venv", "__pycache__"]
-
-# ── Policy: critical patterns must be gitignored ──
+# ── Universal: .env must always be gitignored ──
 
 deny contains msg if {
-	some pattern in required_patterns
-	not _pattern_present(pattern)
-	msg := sprintf(".gitignore: '%s' is not ignored — agents may accidentally commit secrets or artifacts", [pattern])
+	not _pattern_present(".env")
+	msg := ".gitignore: '.env' is not ignored — agents create .env with real secrets"
 }
+
+# ── Python stack ──
+
+deny contains msg if {
+	"python" in data.stacks
+	not _pattern_present(".venv")
+	msg := ".gitignore: '.venv' is not ignored — Python virtual environments bloat the repo"
+}
+
+deny contains msg if {
+	"python" in data.stacks
+	not _pattern_present("__pycache__")
+	msg := ".gitignore: '__pycache__' is not ignored — compiled bytecode should not be tracked"
+}
+
+# ── JavaScript stack ──
+
+deny contains msg if {
+	"javascript" in data.stacks
+	not _pattern_present("node_modules")
+	msg := ".gitignore: 'node_modules' is not ignored — JS dependencies must not be committed"
+}
+
+deny contains msg if {
+	"javascript" in data.stacks
+	not _pattern_present("dist")
+	msg := ".gitignore: 'dist' is not ignored — build output should not be tracked"
+}
+
+# ── Helper ──
 
 _pattern_present(pattern) if {
 	some entry in input

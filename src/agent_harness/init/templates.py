@@ -3,10 +3,16 @@ HARNESS_YML = """\
 # Detected stacks: {stacks}
 stacks: [{stacks_list}]
 
+# exclude:
+#   - _archive/
+#   - vendor/
+
 # python:
 #   coverage_threshold: 95
 #   line_length: 140
-#   max_file_lines: 500
+
+# javascript:
+#   coverage_threshold: 80
 
 # docker:
 #   own_image_prefix: "ghcr.io/myorg/"
