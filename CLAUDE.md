@@ -24,35 +24,46 @@ agent-harness lint             # verify everything passes
 
 ```
 src/agent_harness/
-  cli.py               — Click CLI: detect, init, lint, fix
-  config.py            — .agent-harness.yml parsing, HarnessConfig dataclass
-  detect.py            — Stack detection orchestrator (scans subdirs too)
-  runner.py            — Subprocess execution, CheckResult, tool_available()
-  exclusions.py        — File exclusion patterns (lock files, build output)
-  workspace.py         — Discover subproject roots (.agent-harness.yml scanning)
-  lint.py              — Check pipeline (universal → per-stack), lint_all for monorepos
-  fix.py               — Auto-fix (ruff, biome), fix_all for monorepos
-  init/                — Scaffolding (configs, Makefile, templates)
-  stacks/
+  cli.py               — Click CLI: detect, init, lint, fix (thin — delegates)
+  config.py            — Dict-based config from .agent-harness.yml
+  runner.py            — run_check(), CheckResult, tool_available()
+  conftest.py          — Shared conftest runner (used by all Rego checks)
+  exclusions.py        — File exclusion patterns
+  workspace.py         — Discover subproject roots
+  preset.py            — Preset base class + ToolInfo/PresetInfo
+  registry.py          — Explicit preset registration (PRESETS + UNIVERSAL)
+  detect.py            — Thin orchestrator: for preset in PRESETS: preset.detect()
+  lint.py              — Thin orchestrator: for preset in PRESETS: preset.run_checks()
+  fix.py               — Thin orchestrator: for preset in PRESETS: preset.run_fix()
+  init/                — Scaffolding (reads preset.get_info())
+  presets/
     universal/         — Always runs: yamllint, gitignore, JSON, file length
     python/            — ruff, ty, conftest on pyproject.toml
     javascript/        — Biome, framework type checker, conftest on package.json
     docker/            — hadolint, conftest on Dockerfile + compose
     dokploy/           — conftest for Traefik/Dokploy conventions
-  policies/            — Rego policies (bundled in package). Each has WHAT/WHY/FIX.
+  policies/            — Rego policies (bundled). Each has WHAT/WHY/FIX.
 
 skills/agent-harness/  — Claude Code plugin (SKILL.md + guidance docs)
 ```
 
+## Adding a new preset
+
+1. Create `presets/<name>/` with `__init__.py` implementing `Preset`
+2. Add individual check files (one per tool)
+3. Add `<Name>Preset()` to `registry.py`
+4. Add Rego policies to `policies/<name>/` if needed
+
 ## Conventions
 
+- Each preset implements: `detect()`, `run_checks()`, `run_fix()`, `get_info()`
 - One check per file, with WHAT/WHY/WITHOUT IT/FIX/REQUIRES docstring
 - One Rego policy per file, with `_test.rego` sibling
-- Tests use `tmp_path` fixtures, mock subprocesses via `monkeypatch`
+- All conftest checks use shared `conftest.py` (never local `_run_conftest`)
 - Tool fallback: `shutil.which()` → `uv run` (Python) or `npx` (JS)
-- `import rego.v1` and `if` keyword required in all Rego files
 
 ## Never
 
 - Never embed tool binaries — require them installed externally
 - Never run checks in Docker — must be <500ms local
+- Never duplicate `_run_conftest` — use `agent_harness.conftest.run_conftest()`
