@@ -22,9 +22,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from agent_harness import POLICIES_DIR
 from agent_harness.runner import CheckResult, run_check
-
-POLICIES_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "policies"
 
 
 def _run_conftest(
