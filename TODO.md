@@ -10,6 +10,7 @@ Open questions and unchallenged assumptions from the initial build session.
 
 ## Architecture
 
+- **JSONC support for conftest.** `tsconfig.json`, `jsconfig.json`, `.vscode/*.json` use JSONC (comments + trailing commas). conftest's JSON parser chokes on these. Options: (a) strip comments before feeding to conftest, (b) write tsconfig checks in Python instead of Rego, (c) use check-jsonschema which handles JSONC natively. For now, skip known JSONC files in conftest-json check.
 - **`audit --json`** — agents parse structured data better than prose. Priority for v0.2.
 - **Auto-fix for Rego violations.** Ruff can auto-fix. Conftest can only report. When a Rego policy fails, could we provide fixers? E.g., "add USER nonroot" to Dockerfile, "add healthcheck block" to compose.
 - **`agent-harness test`** — should it exist? Currently out of scope (Makefile owns `make test`). But if agent-harness owns lint and fix, should it also own test orchestration?
