@@ -16,6 +16,7 @@ JSON validation built in.
 
 REQUIRES: conftest (via PATH)
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -37,7 +38,9 @@ def _is_jsonc(filepath: str) -> bool:
     return any(d in JSONC_DIRS for d in parts[:-1])
 
 
-def run_conftest_json(project_dir: Path, exclude_patterns: list[str] | None = None) -> CheckResult:
+def run_conftest_json(
+    project_dir: Path, exclude_patterns: list[str] | None = None
+) -> CheckResult:
     """Validate JSON files via conftest parse --parser json."""
     name = "conftest-json"
     try:

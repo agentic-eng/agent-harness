@@ -15,6 +15,7 @@ FIX: Run `agent-harness audit` to see specific package.json issues.
 
 REQUIRES: conftest (via PATH)
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -35,8 +36,12 @@ def run_conftest_package(project_dir: Path) -> CheckResult:
         )
     policy_path = POLICIES_DIR / "javascript"
     cmd = [
-        "conftest", "test", str(target),
-        "--policy", str(policy_path),
-        "--no-color", "--all-namespaces",
+        "conftest",
+        "test",
+        str(target),
+        "--policy",
+        str(policy_path),
+        "--no-color",
+        "--all-namespaces",
     ]
     return run_check("conftest-package", cmd, cwd=str(project_dir))

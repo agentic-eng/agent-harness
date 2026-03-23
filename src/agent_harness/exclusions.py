@@ -12,6 +12,7 @@ files, agents fixing issues in files they shouldn't touch.
 
 FIX: Add patterns to `exclude:` in .agent-harness.yml.
 """
+
 from __future__ import annotations
 
 import fnmatch

@@ -13,10 +13,14 @@ def test_yamllint_skips_lock_files(tmp_path, monkeypatch):
 
     def mock_run(cmd, **kwargs):
         if "ls-files" in cmd:
-            return subprocess.CompletedProcess(cmd, 0, stdout="pnpm-lock.yaml\n", stderr="")
+            return subprocess.CompletedProcess(
+                cmd, 0, stdout="pnpm-lock.yaml\n", stderr=""
+            )
         return subprocess.run(cmd, **kwargs)
 
-    monkeypatch.setattr("agent_harness.stacks.universal.yamllint_check.subprocess.run", mock_run)
+    monkeypatch.setattr(
+        "agent_harness.stacks.universal.yamllint_check.subprocess.run", mock_run
+    )
     result = run_yamllint(tmp_path, exclude_patterns=["*-lock.*", "*.lock"])
     assert result.passed
     assert "skipping" in result.output.lower() or "No YAML" in result.output

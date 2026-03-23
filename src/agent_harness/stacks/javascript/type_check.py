@@ -16,6 +16,7 @@ FIX: Fix the type errors reported. For Astro, see https://docs.astro.build/en/gu
 
 REQUIRES: Framework CLI (astro, next) or tsc, via PATH or npx fallback
 """
+
 from __future__ import annotations
 
 import json
@@ -54,13 +55,19 @@ def run_type_check(project_dir: Path) -> CheckResult:
 
     if framework == "astro":
         if shutil.which("astro"):
-            return run_check("typecheck:astro", ["astro", "check"], cwd=str(project_dir))
-        return run_check("typecheck:astro", ["npx", "astro", "check"], cwd=str(project_dir))
+            return run_check(
+                "typecheck:astro", ["astro", "check"], cwd=str(project_dir)
+            )
+        return run_check(
+            "typecheck:astro", ["npx", "astro", "check"], cwd=str(project_dir)
+        )
 
     if framework == "next":
         if shutil.which("next"):
             return run_check("typecheck:next", ["next", "lint"], cwd=str(project_dir))
-        return run_check("typecheck:next", ["npx", "next", "lint"], cwd=str(project_dir))
+        return run_check(
+            "typecheck:next", ["npx", "next", "lint"], cwd=str(project_dir)
+        )
 
     # Default: tsc
     if shutil.which("tsc"):

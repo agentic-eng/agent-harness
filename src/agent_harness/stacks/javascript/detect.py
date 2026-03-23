@@ -1,4 +1,5 @@
 """Detect whether a project uses the JavaScript/TypeScript stack."""
+
 from pathlib import Path
 
 JS_INDICATORS = ["package.json", "tsconfig.json", "deno.json"]

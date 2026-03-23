@@ -16,6 +16,7 @@ compose file change (add `traefik.enable=true`, add `dokploy-network`).
 
 REQUIRES: conftest (via PATH)
 """
+
 from __future__ import annotations
 
 from pathlib import Path

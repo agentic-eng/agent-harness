@@ -18,6 +18,7 @@ indentation, quote strings that look like booleans, remove duplicate keys.
 
 REQUIRES: yamllint (via PATH)
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -42,11 +43,15 @@ rules:
 """
 
 
-def run_yamllint(project_dir: Path, exclude_patterns: list[str] | None = None) -> CheckResult:
+def run_yamllint(
+    project_dir: Path, exclude_patterns: list[str] | None = None
+) -> CheckResult:
     # Find YAML files via git ls-files
     result = subprocess.run(
         ["git", "ls-files", "*.yml", "*.yaml"],
-        capture_output=True, text=True, cwd=str(project_dir)
+        capture_output=True,
+        text=True,
+        cwd=str(project_dir),
     )
     yaml_files = [f for f in result.stdout.strip().splitlines() if f]
 
@@ -55,7 +60,11 @@ def run_yamllint(project_dir: Path, exclude_patterns: list[str] | None = None) -
         yaml_files = [f for f in yaml_files if not is_excluded(f, exclude_patterns)]
 
     if not yaml_files:
-        return CheckResult(name="yamllint", passed=True, output="No YAML files (after exclusions), skipping")
+        return CheckResult(
+            name="yamllint",
+            passed=True,
+            output="No YAML files (after exclusions), skipping",
+        )
 
     # Use project's .yamllint.yml if it exists, otherwise use bundled config
     project_config = project_dir / ".yamllint.yml"

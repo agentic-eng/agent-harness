@@ -7,7 +7,7 @@ def test_detect_package_json(tmp_path):
 
 
 def test_detect_tsconfig(tmp_path):
-    (tmp_path / "tsconfig.json").write_text('{}')
+    (tmp_path / "tsconfig.json").write_text("{}")
     assert detect_javascript(tmp_path)
 
 

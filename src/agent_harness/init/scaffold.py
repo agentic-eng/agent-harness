@@ -2,6 +2,7 @@ from pathlib import Path
 from agent_harness.detect import detect_stacks
 from agent_harness.init.templates import HARNESS_YML, YAMLLINT_YML, PRECOMMIT_YML
 
+
 def scaffold_project(project_dir: Path) -> list[str]:
     """Write harness config files. Returns list of actions taken."""
     actions = []
@@ -10,7 +11,9 @@ def scaffold_project(project_dir: Path) -> list[str]:
     stacks_list = ", ".join(sorted(stacks))
 
     files = {
-        ".agent-harness.yml": HARNESS_YML.format(stacks=stacks_str, stacks_list=stacks_list),
+        ".agent-harness.yml": HARNESS_YML.format(
+            stacks=stacks_str, stacks_list=stacks_list
+        ),
         ".yamllint.yml": YAMLLINT_YML,
         ".pre-commit-config.yaml": PRECOMMIT_YML,
     }

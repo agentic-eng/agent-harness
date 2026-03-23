@@ -1,4 +1,5 @@
 """Detect whether a project uses the Docker stack."""
+
 from pathlib import Path
 
 DOCKER_INDICATORS = ["Dockerfile", "docker-compose.prod.yml", "docker-compose.yml"]

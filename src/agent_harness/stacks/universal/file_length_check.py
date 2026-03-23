@@ -16,6 +16,7 @@ components into separate files.
 
 REQUIRES: git (for file listing)
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -48,7 +49,9 @@ def run_file_length(
     git_patterns = [f"*{ext}" for ext in extensions]
     result = subprocess.run(
         ["git", "ls-files"] + git_patterns,
-        capture_output=True, text=True, cwd=str(project_dir)
+        capture_output=True,
+        text=True,
+        cwd=str(project_dir),
     )
     files = [f for f in result.stdout.strip().splitlines() if f]
 
@@ -56,7 +59,9 @@ def run_file_length(
         files = [f for f in files if not is_excluded(f, exclude_patterns)]
 
     if not files:
-        return CheckResult(name="file-length", passed=True, output="No tracked source files to check")
+        return CheckResult(
+            name="file-length", passed=True, output="No tracked source files to check"
+        )
 
     errors = []
     for f in files:

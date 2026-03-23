@@ -1,6 +1,8 @@
 import subprocess
 
-from agent_harness.stacks.universal.conftest_gitignore_check import run_conftest_gitignore
+from agent_harness.stacks.universal.conftest_gitignore_check import (
+    run_conftest_gitignore,
+)
 
 
 def _init_git(tmp_path):

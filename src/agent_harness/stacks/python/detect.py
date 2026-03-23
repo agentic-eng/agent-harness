@@ -1,4 +1,5 @@
 """Detect whether a project uses the Python stack."""
+
 from pathlib import Path
 
 PYTHON_INDICATORS = ["pyproject.toml", "setup.py", "requirements.txt", "uv.lock"]

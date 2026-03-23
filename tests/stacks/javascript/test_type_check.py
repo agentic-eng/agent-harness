@@ -24,7 +24,10 @@ def test_detect_default(tmp_path):
 def test_astro_uses_astro_check(tmp_path):
     pkg = {"dependencies": {"astro": "^6.0.0"}}
     (tmp_path / "package.json").write_text(json.dumps(pkg))
-    with patch("agent_harness.stacks.javascript.type_check.shutil.which", return_value="/usr/bin/astro"):
+    with patch(
+        "agent_harness.stacks.javascript.type_check.shutil.which",
+        return_value="/usr/bin/astro",
+    ):
         with patch("agent_harness.stacks.javascript.type_check.run_check") as mock_run:
             mock_run.return_value = MagicMock(passed=True)
             run_type_check(tmp_path)
@@ -35,7 +38,10 @@ def test_astro_uses_astro_check(tmp_path):
 def test_fallback_uses_tsc(tmp_path):
     pkg = {"dependencies": {"express": "^4.0.0"}}
     (tmp_path / "package.json").write_text(json.dumps(pkg))
-    with patch("agent_harness.stacks.javascript.type_check.shutil.which", return_value="/usr/bin/tsc"):
+    with patch(
+        "agent_harness.stacks.javascript.type_check.shutil.which",
+        return_value="/usr/bin/tsc",
+    ):
         with patch("agent_harness.stacks.javascript.type_check.run_check") as mock_run:
             mock_run.return_value = MagicMock(passed=True)
             run_type_check(tmp_path)

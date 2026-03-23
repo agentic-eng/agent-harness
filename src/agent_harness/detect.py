@@ -1,4 +1,5 @@
 """Stack detection orchestrator — delegates to per-stack detect modules."""
+
 from pathlib import Path
 
 from agent_harness.stacks.python.detect import detect_python

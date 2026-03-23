@@ -17,6 +17,7 @@ FIX: Add the reported entries to .gitignore.
 
 REQUIRES: conftest (via PATH)
 """
+
 from __future__ import annotations
 
 import json
@@ -45,9 +46,7 @@ def run_conftest_gitignore(
 
     # Write stacks data to temp file for conftest --data
     stacks_list = sorted(stacks) if stacks else []
-    data_file = tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False
-    )
+    data_file = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
     json.dump({"stacks": stacks_list}, data_file)
     data_file.close()
 

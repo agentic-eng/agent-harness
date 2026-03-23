@@ -1,9 +1,10 @@
-from pathlib import Path
 from agent_harness.config import load_config
 
 
 def test_load_config_from_file(tmp_path):
-    (tmp_path / ".agent-harness.yml").write_text("stacks: [python, docker]\npython:\n  coverage_threshold: 90\n")
+    (tmp_path / ".agent-harness.yml").write_text(
+        "stacks: [python, docker]\npython:\n  coverage_threshold: 90\n"
+    )
     config = load_config(tmp_path)
     assert "python" in config.stacks
     assert config.python.coverage_threshold == 90

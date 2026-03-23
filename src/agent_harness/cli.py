@@ -2,21 +2,25 @@
 import click
 from pathlib import Path
 
+
 @click.group()
 @click.version_option()
 def cli():
     """AI Harness — deterministic controls for AI agents."""
 
+
 @cli.command()
 def detect():
     """Detect project stacks (Python, Docker, etc.)."""
     from agent_harness.detect import detect_stacks
+
     stacks = detect_stacks(Path.cwd())
     if stacks:
         for stack in sorted(stacks):
             click.echo(stack)
     else:
         click.echo("no stacks detected")
+
 
 def print_results(results) -> int:
     """Print lint results and return exit code."""
@@ -36,12 +40,15 @@ def print_results(results) -> int:
     click.echo(f"\n{len(passed)} passed, {len(failed)} failed ({total_ms}ms)")
     return 1 if failed else 0
 
+
 @cli.command()
 def lint():
     """Run all harness checks."""
     from agent_harness.lint import run_lint
+
     results = run_lint(Path.cwd())
     raise SystemExit(print_results(results))
+
 
 @cli.command()
 def fix():
@@ -58,14 +65,17 @@ def fix():
     results = run_lint(Path.cwd())
     raise SystemExit(print_results(results))
 
+
 @cli.command()
 def init():
     """Initialize harness on a project."""
     from agent_harness.init.scaffold import scaffold_project
+
     actions = scaffold_project(Path.cwd())
     for action in actions:
         click.echo(f"  {action}")
     click.echo("\nHarness initialized. Run 'agent-harness lint' to check.")
+
 
 @cli.command()
 def audit():

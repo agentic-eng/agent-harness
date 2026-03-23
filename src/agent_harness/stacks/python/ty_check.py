@@ -15,6 +15,7 @@ signatures and fix incompatible assignments.
 
 REQUIRES: ty (via PATH or uv run fallback)
 """
+
 from pathlib import Path
 
 from agent_harness.runner import run_check, CheckResult

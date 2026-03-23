@@ -1,6 +1,6 @@
 # tests/test_init.py
-from pathlib import Path
 from agent_harness.init.scaffold import scaffold_project
+
 
 def test_scaffold_creates_files(tmp_path):
     (tmp_path / "pyproject.toml").write_text("[project]\nname='x'")
@@ -9,6 +9,7 @@ def test_scaffold_creates_files(tmp_path):
     assert (tmp_path / ".yamllint.yml").exists()
     assert (tmp_path / ".pre-commit-config.yaml").exists()
     assert any("CREATE" in a for a in actions)
+
 
 def test_scaffold_skips_existing(tmp_path):
     (tmp_path / ".agent-harness.yml").write_text("stacks: [python]")

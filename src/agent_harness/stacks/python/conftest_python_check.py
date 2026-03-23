@@ -18,6 +18,7 @@ their fixes.
 
 REQUIRES: conftest (via PATH)
 """
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -17,6 +17,7 @@ Dockerfile change (add USER, add HEALTHCHECK, reorder COPY layers, etc.).
 
 REQUIRES: conftest (via PATH)
 """
+
 from __future__ import annotations
 
 from pathlib import Path

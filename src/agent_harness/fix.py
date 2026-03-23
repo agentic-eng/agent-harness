@@ -34,7 +34,11 @@ def run_fix(project_dir: Path) -> list[str]:
 
     # JavaScript: biome fix
     if "javascript" in config.stacks:
-        from agent_harness.stacks.javascript.biome_check import _biome_prefix, BIOME_VCS_FLAGS
+        from agent_harness.stacks.javascript.biome_check import (
+            _biome_prefix,
+            BIOME_VCS_FLAGS,
+        )
+
         biome_cmd = _biome_prefix() + ["check", "--fix", "."] + BIOME_VCS_FLAGS
 
         result = run_check("biome:fix", biome_cmd, cwd=str(project_dir))

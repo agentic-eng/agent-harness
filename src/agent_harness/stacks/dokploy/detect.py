@@ -1,4 +1,5 @@
 """Detect whether a project deploys to Dokploy."""
+
 from pathlib import Path
 
 COMPOSE_FILES = ["docker-compose.prod.yml", "docker-compose.yml"]

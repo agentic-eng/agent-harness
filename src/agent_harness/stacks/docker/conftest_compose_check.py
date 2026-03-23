@@ -19,6 +19,7 @@ compose file change (escape $$, add healthcheck, add restart policy, bind to
 
 REQUIRES: conftest (via PATH)
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -55,9 +56,7 @@ def _run_conftest(
     return run_check(name, cmd, cwd=str(project_dir))
 
 
-def run_conftest_compose(
-    project_dir: Path, own_image_prefix: str = ""
-) -> CheckResult:
+def run_conftest_compose(project_dir: Path, own_image_prefix: str = "") -> CheckResult:
     """Run conftest on docker-compose.prod.yml with bundled compose policies."""
     return _run_conftest(
         "conftest-compose",
