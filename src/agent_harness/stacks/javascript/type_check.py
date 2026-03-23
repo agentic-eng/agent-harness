@@ -27,7 +27,7 @@ from agent_harness.runner import run_check, CheckResult
 FRAMEWORK_DEPS = {
     "astro": "astro",
     "next": "next",
-    "nuxt": "nuxt",
+    # "nuxt": "nuxt",  # TODO: add nuxi typecheck support
 }
 
 

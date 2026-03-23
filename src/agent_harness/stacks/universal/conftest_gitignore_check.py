@@ -20,6 +20,7 @@ REQUIRES: conftest (via PATH)
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 from pathlib import Path
 
@@ -61,4 +62,7 @@ def run_conftest_gitignore(
         "--data",
         data_file.name,
     ]
-    return run_check("conftest-gitignore", cmd, cwd=str(project_dir))
+    try:
+        return run_check("conftest-gitignore", cmd, cwd=str(project_dir))
+    finally:
+        os.unlink(data_file.name)

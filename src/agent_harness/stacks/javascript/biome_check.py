@@ -20,26 +20,30 @@ import shutil
 
 from agent_harness.runner import run_check, CheckResult
 
+# Respect .gitignore via biome's VCS integration — skip dist/, .astro/, node_modules/
+BIOME_VCS_FLAGS = ["--vcs-enabled=true", "--vcs-client-kind=git", "--vcs-use-ignore-file=true"]
+
+
+def _biome_prefix() -> list[str]:
+    """Return biome command prefix — direct if in PATH, npx fallback otherwise."""
+    if shutil.which("biome"):
+        return ["biome"]
+    return ["npx", "@biomejs/biome"]
+
 
 def run_biome(project_dir: Path) -> list[CheckResult]:
     """Run biome lint and biome format --check. Returns list of results."""
     results = []
-    if shutil.which("biome"):
-        prefix = ["biome"]
-    else:
-        prefix = ["npx", "@biomejs/biome"]
-
-    # Use VCS ignore to skip .gitignore'd dirs (dist/, .astro/, node_modules/)
-    vcs_flags = ["--vcs-enabled=true", "--vcs-client-kind=git", "--vcs-use-ignore-file=true"]
+    prefix = _biome_prefix()
 
     results.append(run_check(
         "biome:lint",
-        prefix + ["lint", "."] + vcs_flags,
+        prefix + ["lint", "."] + BIOME_VCS_FLAGS,
         cwd=str(project_dir),
     ))
     results.append(run_check(
         "biome:format",
-        prefix + ["format", "--check", "."] + vcs_flags,
+        prefix + ["format", "--check", "."] + BIOME_VCS_FLAGS,
         cwd=str(project_dir),
     ))
     return results

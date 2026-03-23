@@ -26,7 +26,11 @@ def run_lint(project_dir: Path) -> list[CheckResult]:
     results.append(run_conftest_gitignore(project_dir, stacks=config.stacks))
     results.append(run_conftest_json(project_dir, exclude_patterns=exclude))
     results.append(run_yamllint(project_dir, exclude_patterns=exclude))
-    results.append(run_file_length(project_dir, exclude_patterns=exclude))
+    # Pass Python max_file_lines override if configured
+    file_length_override = {}
+    if "python" in config.stacks and config.python.max_file_lines != 500:
+        file_length_override[".py"] = config.python.max_file_lines
+    results.append(run_file_length(project_dir, max_lines_override=file_length_override or None, exclude_patterns=exclude))
 
     # Python checks
     if "python" in config.stacks:
