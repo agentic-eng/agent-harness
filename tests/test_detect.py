@@ -60,3 +60,41 @@ def test_detect_dokploy_and_docker(tmp_path):
     (tmp_path / "Dockerfile").write_text("FROM python:3.12")
     stacks = detect_stacks(tmp_path)
     assert "dokploy" in stacks and "docker" in stacks
+
+
+def test_detect_all_root_only(tmp_path):
+    (tmp_path / "pyproject.toml").write_text("[project]\nname='x'")
+    from agent_harness.detect import detect_all
+    results = detect_all(tmp_path)
+    assert tmp_path in results
+    assert "python" in results[tmp_path]
+
+
+def test_detect_all_subprojects(tmp_path):
+    (tmp_path / "Dockerfile").write_text("FROM python:3.12")
+    backend = tmp_path / "backend"
+    backend.mkdir()
+    (backend / "pyproject.toml").write_text("[project]\nname='x'")
+    frontend = tmp_path / "frontend"
+    frontend.mkdir()
+    (frontend / "package.json").write_text('{"name":"y"}')
+    from agent_harness.detect import detect_all
+    results = detect_all(tmp_path)
+    assert "docker" in results[tmp_path]
+    assert "python" in results[backend]
+    assert "javascript" in results[frontend]
+
+
+def test_detect_all_skips_excluded(tmp_path):
+    venv = tmp_path / ".venv"
+    venv.mkdir()
+    (venv / "pyproject.toml").write_text("[project]\nname='x'")
+    from agent_harness.detect import detect_all
+    results = detect_all(tmp_path)
+    assert venv not in results
+
+
+def test_detect_all_empty(tmp_path):
+    from agent_harness.detect import detect_all
+    results = detect_all(tmp_path)
+    assert results == {}

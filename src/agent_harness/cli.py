@@ -11,15 +11,20 @@ def cli():
 
 @cli.command()
 def detect():
-    """Detect project stacks (Python, Docker, etc.)."""
-    from agent_harness.detect import detect_stacks
+    """Detect project stacks and subprojects."""
+    from agent_harness.detect import detect_all
 
-    stacks = detect_stacks(Path.cwd())
-    if stacks:
-        for stack in sorted(stacks):
-            click.echo(stack)
-    else:
+    cwd = Path.cwd()
+    results = detect_all(cwd)
+    if not results:
         click.echo("no stacks detected")
+        return
+    for path, stacks in sorted(results.items()):
+        rel = "." if path == cwd else str(path.relative_to(cwd))
+        stacks_str = ", ".join(sorted(stacks))
+        has_harness = (path / ".agent-harness.yml").exists()
+        suffix = "" if has_harness else "  (no .agent-harness.yml)"
+        click.echo(f"{rel:<30} {stacks_str}{suffix}")
 
 
 def print_results(results) -> int:
