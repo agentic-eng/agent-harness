@@ -1,4 +1,6 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 from agent_harness.config import load_config
 from agent_harness.exclusions import get_excluded_patterns
 from agent_harness.runner import CheckResult
@@ -68,3 +70,26 @@ def run_lint(project_dir: Path) -> list[CheckResult]:
         results.append(run_conftest_package(project_dir))
 
     return results
+
+
+def run_lint_all(project_dir: Path) -> dict[Path, list[CheckResult]]:
+    """Discover all subprojects and run lint in each. Returns {path: results}."""
+    from agent_harness.workspace import discover_roots
+
+    roots = discover_roots(project_dir)
+    if not roots:
+        # No .agent-harness.yml found anywhere — just run in current dir
+        return {project_dir: run_lint(project_dir)}
+
+    all_results: dict[Path, list[CheckResult]] = {}
+    with ThreadPoolExecutor() as pool:
+        futures = {pool.submit(run_lint, root): root for root in roots}
+        for future in as_completed(futures):
+            root = futures[future]
+            try:
+                all_results[root] = future.result()
+            except Exception as e:
+                all_results[root] = [
+                    CheckResult(name="error", passed=False, error=str(e))
+                ]
+    return all_results

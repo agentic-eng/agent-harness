@@ -47,12 +47,27 @@ def print_results(results) -> int:
 
 
 @cli.command()
-def lint():
+@click.option("--all", "run_all", is_flag=True, help="Lint all subprojects (monorepo mode)")
+def lint(run_all):
     """Run all harness checks."""
-    from agent_harness.lint import run_lint
+    if run_all:
+        from agent_harness.lint import run_lint_all
 
-    results = run_lint(Path.cwd())
-    raise SystemExit(print_results(results))
+        cwd = Path.cwd()
+        all_results = run_lint_all(cwd)
+        total_exit = 0
+        for path, results in sorted(all_results.items()):
+            rel = "." if path == cwd else str(path.relative_to(cwd))
+            click.echo(f"\n=== {rel} ===")
+            exit_code = print_results(results)
+            if exit_code:
+                total_exit = 1
+        raise SystemExit(total_exit)
+    else:
+        from agent_harness.lint import run_lint
+
+        results = run_lint(Path.cwd())
+        raise SystemExit(print_results(results))
 
 
 @cli.command()
