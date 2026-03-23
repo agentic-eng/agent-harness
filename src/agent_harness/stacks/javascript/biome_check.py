@@ -1,7 +1,7 @@
 """
 Biome lint and format check.
 
-WHAT: Runs biome lint and biome format --check on the project.
+WHAT: Runs biome lint and biome format on the project.
 
 WHY: Biome is the ruff of JavaScript — a single Rust-based tool for linting and
 formatting, ~20x faster than ESLint. Agents generate code with unused variables,
@@ -37,7 +37,7 @@ def _biome_prefix() -> list[str]:
 
 
 def run_biome(project_dir: Path) -> list[CheckResult]:
-    """Run biome lint and biome format --check. Returns list of results."""
+    """Run biome lint and biome format (check mode). Returns list of results."""
     results = []
     prefix = _biome_prefix()
 
@@ -51,7 +51,7 @@ def run_biome(project_dir: Path) -> list[CheckResult]:
     results.append(
         run_check(
             "biome:format",
-            prefix + ["format", "--check", "."] + BIOME_VCS_FLAGS,
+            prefix + ["format", "."] + BIOME_VCS_FLAGS,
             cwd=str(project_dir),
         )
     )

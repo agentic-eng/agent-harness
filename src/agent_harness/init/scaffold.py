@@ -1,6 +1,8 @@
 from pathlib import Path
+
 from agent_harness.detect import detect_stacks
 from agent_harness.init.templates import HARNESS_YML, YAMLLINT_YML, PRECOMMIT_YML
+from agent_harness.stacks.javascript.templates import BIOME_CONFIG
 
 
 def scaffold_project(project_dir: Path) -> list[str]:
@@ -10,13 +12,17 @@ def scaffold_project(project_dir: Path) -> list[str]:
     stacks_str = ", ".join(sorted(stacks)) if stacks else "none detected"
     stacks_list = ", ".join(sorted(stacks))
 
-    files = {
+    files: dict[str, str] = {
         ".agent-harness.yml": HARNESS_YML.format(
             stacks=stacks_str, stacks_list=stacks_list
         ),
         ".yamllint.yml": YAMLLINT_YML,
         ".pre-commit-config.yaml": PRECOMMIT_YML,
     }
+
+    # JS stack: scaffold biome.json
+    if "javascript" in stacks:
+        files["biome.json"] = BIOME_CONFIG
 
     for filename, content in files.items():
         path = project_dir / filename

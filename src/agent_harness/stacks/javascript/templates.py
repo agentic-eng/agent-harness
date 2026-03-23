@@ -14,6 +14,11 @@ BIOME_CONFIG = """\
     "indentStyle": "space",
     "indentWidth": 2,
     "lineWidth": 100
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
   }
 }
 """
