@@ -21,15 +21,17 @@
 - **Dokploy stack** — auto-detection from `dokploy-network` in compose files, 2 Rego policies (traefik.enable required, dokploy-network required for Traefik-routed services)
 - Tested on real JS project (iorlas.com Astro blog), 60 Python tests + 73 Rego tests
 
-## Next (v0.2 — CLI simplification + monorepo)
+## Done (v0.2 — CLI simplification + monorepo)
 
-- **CLI: 4 commands** — detect, init, lint, fix. Remove `audit` (absorbed by detect + init).
-- **Monorepo support** — distributed dotfiles, `detect` scans subdirectories, `lint --all` runs all scopes in parallel
-- **Makefile scaffolding** — `init` creates Makefile with `make lint` target
-- **Init confirmation** — shows detected stacks + tool descriptions, `--yes` for CI/agents
-- See `docs/plans/2026-03-26-v02-cli-simplification.md` for full plan
+- **CLI: 4 commands** — detect, init, lint, fix. Removed `audit` (absorbed by detect + init).
+- **Monorepo support** — distributed dotfiles per subproject, `detect` scans subdirectories, `lint --all` / `fix --all` run all scopes in parallel via ThreadPoolExecutor
+- **Makefile scaffolding** — `init` creates Makefile with `make lint` target, stack-appropriate test command
+- **Init with tool reporting** — shows detected stacks + tool descriptions + availability (✓/✗), `--yes` for CI/agents
+- **Workspace discovery** — `workspace.py` finds all `.agent-harness.yml` in the tree, skips excluded dirs
+- 89 Python tests + 87 Rego tests
 
-### Also v0.2
+## Next (v0.3)
+
 - Publish to PyPI as `agent-harness`
 - GitHub Actions workflow validation policies
 - `.pre-commit-config.yaml` validation policies

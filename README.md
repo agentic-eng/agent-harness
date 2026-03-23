@@ -151,11 +151,10 @@ docker:
 
 | Command | Description |
 |---------|-------------|
-| `agent-harness detect` | Show detected stacks |
-| `agent-harness lint` | Run all checks — exits non-zero on failure |
-| `agent-harness fix` | Auto-fix (ruff, biome), then lint |
-| `agent-harness init` | Scaffold `.agent-harness.yml`, `.yamllint.yml`, pre-commit config |
-| `agent-harness audit` | Gap analysis — what's missing, how to fix it |
+| `agent-harness detect` | Show detected stacks and subprojects |
+| `agent-harness init` | Scaffold configs, Makefile, show tool availability (`--yes` for CI) |
+| `agent-harness lint` | Run all checks — exits non-zero on failure (`--all` for monorepo) |
+| `agent-harness fix` | Auto-fix (ruff, biome), then lint (`--all` for monorepo) |
 
 ## For AI Agents
 
