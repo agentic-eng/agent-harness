@@ -29,11 +29,11 @@ agent-harness fix
 
 ## What's inside
 
-32 Rego policies across 4 categories, plus external tool orchestration.
+34 Rego policies across 4 categories, plus external tool orchestration.
 
 **Dockerfile** (7 rules) — layer ordering, cache mount usage, Alpine/musl detection, USER directive, HEALTHCHECK, secrets in ENV/ARG, base image pinning.
 
-**Docker Compose** (10 rules) — build directives in prod, image pinning, implicit `:latest`, healthchecks on long-running services, restart policies, port binding, `$$` escaping, hostname configuration.
+**Docker Compose** (12 rules) — build directives in prod, image pinning, implicit `:latest`, healthchecks on long-running services, restart policies, port binding, `$$` escaping, hostname configuration, bind mount volumes, inline config content.
 
 **Python / pyproject.toml** (14 rules) — ruff output-format and line-length, coverage thresholds, pytest configuration, test isolation (no hardcoded paths, no `sleep` in tests).
 
