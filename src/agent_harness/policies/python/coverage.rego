@@ -3,18 +3,10 @@ package python.coverage
 # COVERAGE CONFIG — show gaps, not green files
 #
 # WHAT: Ensures coverage output is optimized so agents see gaps, not noise.
+# These are gates that must exist. Value judgments are handled by init.
 #
-# WHY (skip_covered): With 95% coverage, most files are green. Without
-# skip_covered, the agent sees 50+ fully-covered files drowning the 2 that
-# actually need work. Signal-to-noise ratio collapses.
-# WHY (branch): Line-only coverage misses untested if/else branches. Code
-# can have 100% line coverage but skip entire conditional paths.
-#
-# WITHOUT IT: Agent wastes time scrolling through green files looking for
-# the one uncovered module. Untested branches silently pass coverage gates.
-#
-# FIX: Set skip_covered = true in [tool.coverage.report] and branch = true
-# in [tool.coverage.run].
+# LINT RULES (deny): Is coverage objectively misconfigured?
+# INIT CHECKS (Python): Is it optimally configured? Fix it.
 #
 # Input: parsed pyproject.toml (TOML -> JSON)
 
@@ -48,13 +40,4 @@ deny contains msg if {
 	run := input.tool.coverage.run
 	run.branch == false
 	msg := "coverage.run: branch is false — set to true to catch untested if/else branches"
-}
-
-# ── Policy: show_missing = false ──
-# Missing line numbers in terminal add noise; XML report has them for diff-cover.
-
-warn contains msg if {
-	report := input.tool.coverage.report
-	report.show_missing == true
-	msg := "coverage.report: show_missing is true — consider false to reduce noise (XML report has line numbers for diff-cover)"
 }
