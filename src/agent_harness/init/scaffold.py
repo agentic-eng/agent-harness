@@ -3,7 +3,7 @@ from pathlib import Path
 
 from agent_harness.config import load_config
 from agent_harness.detect import detect_stacks
-from agent_harness.init.diagnostic import display_diagnostics, display_summary
+from agent_harness.init.diagnostic import display_setup_issues, display_summary
 from agent_harness.init.templates import (
     HARNESS_YML,
     YAMLLINT_YML,
@@ -27,26 +27,27 @@ def scaffold_project(project_dir: Path, yes: bool = False) -> list[str]:
 
     total_critical = 0
     total_recommendations = 0
+    total_fixable = 0
 
-    # Run diagnostics for each active preset
+    # Run setup checks for each active preset
     for preset in PRESETS:
         if preset.name in stacks:
-            diagnostics = preset.run_diagnostic(project_dir, config)
+            issues = preset.run_setup(project_dir, config)
             info = preset.get_info()
-            c, r = display_diagnostics(
-                preset.name, diagnostics, info.tools, project_dir
-            )
+            c, r, f = display_setup_issues(preset.name, issues, info.tools, project_dir)
             total_critical += c
             total_recommendations += r
+            total_fixable += f
 
-    # Run universal preset diagnostics
-    universal_diagnostics = UNIVERSAL.run_diagnostic(project_dir, config)
+    # Run universal preset setup checks
+    universal_issues = UNIVERSAL.run_setup(project_dir, config)
     universal_info = UNIVERSAL.get_info()
-    c, r = display_diagnostics(
-        "universal", universal_diagnostics, universal_info.tools, project_dir
+    c, r, f = display_setup_issues(
+        "universal", universal_issues, universal_info.tools, project_dir
     )
     total_critical += c
     total_recommendations += r
+    total_fixable += f
 
     # Determine test command for Makefile
     if "python" in stacks:
@@ -80,7 +81,9 @@ def scaffold_project(project_dir: Path, yes: bool = False) -> list[str]:
             click.echo(f"    + {filename}")
 
     # Show summary
-    display_summary(total_critical, total_recommendations, missing_file_count)
+    display_summary(
+        total_critical, total_recommendations, total_fixable, missing_file_count
+    )
 
     # If no files to create, we're done
     if not missing_files:

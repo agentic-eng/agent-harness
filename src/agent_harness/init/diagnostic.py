@@ -6,29 +6,33 @@ from pathlib import Path
 
 import click
 
-from agent_harness.conftest import DiagnosticResult
 from agent_harness.preset import ToolInfo
 from agent_harness.runner import tool_available
+from agent_harness.setup import SetupIssue
 
 
-def display_diagnostics(
+def display_setup_issues(
     preset_name: str,
-    diagnostics: list[DiagnosticResult],
+    issues: list[SetupIssue],
     tools: list[ToolInfo],
     project_dir: Path,
-) -> tuple[int, int]:
-    """Display diagnostic results for a preset. Returns (critical_count, recommendation_count)."""
-    click.echo(f"\n  Scanning {preset_name}...")
+) -> tuple[int, int, int]:
+    """Display setup check results. Returns (critical_count, recommendation_count, fixable_count)."""
+    click.echo(f"\n  {preset_name}:")
 
     critical_count = 0
     recommendation_count = 0
+    fixable_count = 0
 
-    for diag in diagnostics:
-        for msg in diag.critical:
-            click.echo(f"    \u2717 {diag.target_file}: {msg}    critical")
+    for issue in issues:
+        if issue.severity == "critical":
+            suffix = " (fixable)" if issue.fixable else ""
+            click.echo(f"    \u2717 {issue.file}: {issue.message}    critical{suffix}")
             critical_count += 1
-        for msg in diag.recommendations:
-            click.echo(f"    ~ {diag.target_file}: {msg}    recommendation")
+            if issue.fixable:
+                fixable_count += 1
+        else:
+            click.echo(f"    ~ {issue.file}: {issue.message}    recommendation")
             recommendation_count += 1
 
     for tool in tools:
@@ -39,14 +43,17 @@ def display_diagnostics(
             click.echo(f"    \u2717 {tool.name} not installed    ({tool.install_hint})")
             critical_count += 1
 
-    return critical_count, recommendation_count
+    return critical_count, recommendation_count, fixable_count
 
 
-def display_summary(critical: int, recommendations: int, missing_files: int) -> None:
+def display_summary(
+    critical: int, recommendations: int, fixable: int, missing_files: int
+) -> None:
     """Display final summary line."""
     parts = []
     if critical:
-        parts.append(f"{critical} critical")
+        fix_note = f" ({fixable} fixable)" if fixable else ""
+        parts.append(f"{critical} critical{fix_note}")
     if recommendations:
         parts.append(
             f"{recommendations} recommendation{'s' if recommendations != 1 else ''}"

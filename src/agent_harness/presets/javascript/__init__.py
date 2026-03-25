@@ -25,17 +25,6 @@ class JavaScriptPreset(Preset):
         results.append(run_conftest_package(project_dir))
         return results
 
-    def run_diagnostic(self, project_dir: Path, config: dict):
-        from agent_harness.conftest import run_conftest_diagnostic
-
-        results = []
-        results.append(
-            run_conftest_diagnostic(
-                "javascript-config", project_dir, "package.json", "javascript"
-            )
-        )
-        return results
-
     def run_fix(self, project_dir: Path, config: dict) -> list[str]:
         from .fix import run_javascript_fix
 

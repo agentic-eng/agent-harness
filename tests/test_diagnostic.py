@@ -6,10 +6,9 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
-
-from agent_harness.conftest import DiagnosticResult
-from agent_harness.init.diagnostic import display_diagnostics, display_summary
+from agent_harness.init.diagnostic import display_setup_issues, display_summary
 from agent_harness.preset import ToolInfo
+from agent_harness.setup import SetupIssue
 
 
 def capture_output(fn, *args, **kwargs):
@@ -21,84 +20,89 @@ def capture_output(fn, *args, **kwargs):
     return output.getvalue(), result
 
 
-def test_display_diagnostics_critical():
-    diag = DiagnosticResult(
-        name="pytest_check",
-        target_file="pyproject.toml",
-        critical=["addopts missing --strict-markers"],
-        passed=False,
+def test_display_critical_fixable():
+    issue = SetupIssue(
+        file="pyproject.toml",
+        message="--cov-fail-under not set",
+        severity="critical",
+        fix=lambda p: None,
     )
-    text, (critical_count, rec_count) = capture_output(
-        display_diagnostics, "python", [diag], [], Path("/tmp")
+    text, (c, r, f) = capture_output(
+        display_setup_issues, "python", [issue], [], Path("/tmp")
     )
     assert "✗" in text
-    assert "pyproject.toml" in text
-    assert "addopts missing --strict-markers" in text
     assert "critical" in text
-    assert critical_count == 1
-    assert rec_count == 0
+    assert "fixable" in text
+    assert c == 1 and r == 0 and f == 1
 
 
-def test_display_diagnostics_recommendations():
-    diag = DiagnosticResult(
-        name="ruff_check",
-        target_file="pyproject.toml",
-        recommendations=['ruff output-format is "full"'],
-        passed=True,
+def test_display_critical_not_fixable():
+    issue = SetupIssue(
+        file="pyproject.toml",
+        message="something wrong",
+        severity="critical",
     )
-    text, (critical_count, rec_count) = capture_output(
-        display_diagnostics, "python", [diag], [], Path("/tmp")
+    text, (c, r, f) = capture_output(
+        display_setup_issues, "python", [issue], [], Path("/tmp")
+    )
+    assert "✗" in text
+    assert "critical" in text
+    assert "fixable" not in text
+    assert c == 1 and f == 0
+
+
+def test_display_recommendation():
+    issue = SetupIssue(
+        file="pyproject.toml",
+        message="--cov-fail-under=50, recommend 90-95%",
+        severity="recommendation",
+    )
+    text, (c, r, f) = capture_output(
+        display_setup_issues, "python", [issue], [], Path("/tmp")
     )
     assert "~" in text
-    assert "pyproject.toml" in text
-    assert 'ruff output-format is "full"' in text
     assert "recommendation" in text
-    assert critical_count == 0
-    assert rec_count == 1
+    assert c == 0 and r == 1
 
 
-def test_display_diagnostics_tools_available():
+def test_display_tools_available():
     tool = ToolInfo(
         name="ruff",
-        description="Python linter",
+        description="linter",
         binary="ruff",
         install_hint="pip install ruff",
     )
     with patch("agent_harness.init.diagnostic.tool_available", return_value=True):
-        text, (critical_count, rec_count) = capture_output(
-            display_diagnostics, "python", [], [tool], Path("/tmp")
+        text, (c, r, f) = capture_output(
+            display_setup_issues, "python", [], [tool], Path("/tmp")
         )
     assert "✓" in text
     assert "ruff installed" in text
-    assert critical_count == 0
-    assert rec_count == 0
 
 
-def test_display_diagnostics_tools_missing():
+def test_display_tools_missing():
     tool = ToolInfo(
         name="ruff",
-        description="Python linter",
+        description="linter",
         binary="ruff",
         install_hint="pip install ruff",
     )
     with patch("agent_harness.init.diagnostic.tool_available", return_value=False):
-        text, (critical_count, rec_count) = capture_output(
-            display_diagnostics, "python", [], [tool], Path("/tmp")
+        text, (c, r, f) = capture_output(
+            display_setup_issues, "python", [], [tool], Path("/tmp")
         )
     assert "✗" in text
     assert "ruff not installed" in text
-    assert "pip install ruff" in text
-    assert critical_count == 1
-    assert rec_count == 0
+    assert c == 1
 
 
-def test_display_summary_mixed():
-    text, _ = capture_output(display_summary, 2, 3, 1)
-    assert "2 critical" in text
-    assert "3 recommendations" in text
+def test_display_summary_with_fixable():
+    text, _ = capture_output(display_summary, 3, 1, 2, 1)
+    assert "3 critical (2 fixable)" in text
+    assert "1 recommendation" in text
     assert "1 file to create" in text
 
 
 def test_display_summary_all_passed():
-    text, _ = capture_output(display_summary, 0, 0, 0)
+    text, _ = capture_output(display_summary, 0, 0, 0, 0)
     assert "All checks passed" in text

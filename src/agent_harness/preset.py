@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from agent_harness.conftest import DiagnosticResult
 from agent_harness.runner import CheckResult
+from agent_harness.setup import SetupIssue
 
 
 @dataclass
@@ -39,8 +39,8 @@ class Preset:
     def run_fix(self, project_dir: Path, config: dict) -> list[str]:
         return []
 
-    def run_diagnostic(self, project_dir: Path, config: dict) -> list[DiagnosticResult]:
-        """Run all Rego policies in advisory mode. Returns critical + recommendations."""
+    def run_setup(self, project_dir: Path, config: dict) -> list[SetupIssue]:
+        """Run setup checks. Returns issues with optional fixes."""
         return []
 
     def get_info(self) -> PresetInfo:

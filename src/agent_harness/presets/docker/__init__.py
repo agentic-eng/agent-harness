@@ -29,30 +29,6 @@ class DockerPreset(Preset):
         results.append(run_hadolint(project_dir))
         return results
 
-    def run_diagnostic(self, project_dir: Path, config: dict):
-        from agent_harness.conftest import run_conftest_diagnostic
-
-        results = []
-        results.append(
-            run_conftest_diagnostic(
-                "docker-dockerfile", project_dir, "Dockerfile", "dockerfile"
-            )
-        )
-        compose_data = None
-        own_prefix = config.get("docker", {}).get("own_image_prefix", "")
-        if own_prefix:
-            compose_data = {"own_image_prefix": own_prefix}
-        results.append(
-            run_conftest_diagnostic(
-                "docker-compose",
-                project_dir,
-                "docker-compose.prod.yml",
-                "compose",
-                data=compose_data,
-            )
-        )
-        return results
-
     def run_fix(self, project_dir: Path, config: dict) -> list[str]:
         return []
 

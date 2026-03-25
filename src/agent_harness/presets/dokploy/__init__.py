@@ -19,17 +19,6 @@ class DokployPreset(Preset):
 
         return [run_conftest_dokploy(project_dir)]
 
-    def run_diagnostic(self, project_dir: Path, config: dict):
-        from agent_harness.conftest import run_conftest_diagnostic
-
-        results = []
-        results.append(
-            run_conftest_diagnostic(
-                "dokploy-config", project_dir, "docker-compose.prod.yml", "dokploy"
-            )
-        )
-        return results
-
     def run_fix(self, project_dir: Path, config: dict) -> list[str]:
         return []
 
