@@ -62,6 +62,29 @@ skills/agent-harness/  — Claude Code plugin (SKILL.md + guidance docs)
 - All conftest checks use shared `conftest.py` (never local `_run_conftest`)
 - Tool fallback: `shutil.which()` → `uv run` (Python) or `npx` (JS)
 
+## Policy Design Strategy
+
+Every check belongs in exactly one place. The boundary:
+
+**"Would any reasonable person agree this is broken?"**
+- YES → lint (Rego `deny` rule in `policies/`)
+- Debatable → init (Python setup check in `presets/*/setup.py`)
+
+### Lint (Rego, every commit)
+- Only `deny` rules. No `warn`.
+- Checks that gates EXIST and aren't objectively broken.
+- Examples: `--strict-markers` missing, `--cov-fail-under` missing, threshold < 30%
+
+### Init (Python, on-demand)
+- `SetupIssue` with severity `critical` (fixable) or `recommendation`.
+- Checks configuration QUALITY. Can auto-fix.
+- Examples: threshold = 50% (recommend 90-95%), missing `-v` flag
+
+### Same topic, both places
+A single topic (e.g., coverage threshold) can have both:
+- Lint Rego: "does the gate exist? Is it >= 30%?" (broken gate detection)
+- Init Python: "is the value optimal? fix to 95%" (quality + auto-fix)
+
 ## Never
 
 - Never embed tool binaries — require them installed externally
