@@ -56,7 +56,7 @@ skills/agent-harness/  — Claude Code plugin (SKILL.md + guidance docs)
 
 ## Conventions
 
-- Each preset implements: `detect()`, `run_checks()`, `run_fix()`, `get_info()`
+- Each preset implements: `detect()`, `run_checks()`, `run_fix()`, `run_setup()`, `get_info()`
 - One check per file, with WHAT/WHY/WITHOUT IT/FIX/REQUIRES docstring
 - One Rego policy per file, with `_test.rego` sibling
 - All conftest checks use shared `conftest.py` (never local `_run_conftest`)
