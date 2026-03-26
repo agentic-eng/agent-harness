@@ -40,6 +40,7 @@ def test_fix_appends_missing_patterns(tmp_path):
 
     # Apply the fix
     for issue in fixable:
+        assert issue.fix is not None
         issue.fix(tmp_path)
 
     content = (tmp_path / ".gitignore").read_text()
@@ -57,6 +58,7 @@ def test_fix_creates_gitignore_if_missing(tmp_path):
     fixable = [i for i in issues if i.fixable]
     assert len(fixable) == 1
 
+    assert fixable[0].fix is not None
     fixable[0].fix(tmp_path)
 
     content = (tmp_path / ".gitignore").read_text()

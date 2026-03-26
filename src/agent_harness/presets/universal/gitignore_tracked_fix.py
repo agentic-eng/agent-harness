@@ -28,4 +28,6 @@ def fix_gitignore_tracked(project_dir: Path) -> list[str]:
         cwd=str(project_dir),
     )
     count = len(files)
-    return [f"gitignore-tracked: removed {count} file{'s' if count != 1 else ''} from git tracking"]
+    return [
+        f"gitignore-tracked: removed {count} file{'s' if count != 1 else ''} from git tracking"
+    ]
