@@ -41,4 +41,11 @@ _is_bind_mount(volume) if {
 	parts := split(volume, ":")
 	count(parts) >= 2
 	startswith(parts[0], "/")
+	not _is_allowed_socket(parts[0])
+}
+
+# docker.sock is a Unix domain socket that exists on every Docker host.
+# Named volumes can't replace it. Used by traefik, portainer, deunhealth, etc.
+_is_allowed_socket(host_path) if {
+	host_path == "/var/run/docker.sock"
 }

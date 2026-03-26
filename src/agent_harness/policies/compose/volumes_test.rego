@@ -22,3 +22,11 @@ test_no_volumes_passes if {
 test_service_without_volumes_key_passes if {
 	count(volumes.deny) == 0 with input as {"services": {"app": {}}}
 }
+
+test_docker_sock_allowed if {
+	count(volumes.deny) == 0 with input as {"services": {"traefik": {"volumes": ["/var/run/docker.sock:/var/run/docker.sock:ro"]}}}
+}
+
+test_other_absolute_path_still_denied if {
+	count(volumes.deny) > 0 with input as {"services": {"app": {"volumes": ["/etc/config:/config"]}}}
+}
