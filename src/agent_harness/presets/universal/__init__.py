@@ -44,7 +44,9 @@ class UniversalPreset(Preset):
         return results
 
     def run_fix(self, project_dir: Path, config: dict) -> list[str]:
-        return []
+        from .gitignore_tracked_fix import fix_gitignore_tracked
+
+        return fix_gitignore_tracked(project_dir)
 
     def get_info(self) -> PresetInfo:
         return PresetInfo(
