@@ -7,7 +7,7 @@ from pathlib import Path
 import click
 
 from agent_harness.config import load_config
-from agent_harness.detect import detect_stacks
+from agent_harness.detect import detect_all, detect_stacks
 from agent_harness.init.diagnostic import display_setup_issues, display_summary
 from agent_harness.init.templates import (
     HARNESS_YML,
@@ -114,3 +114,15 @@ def scaffold_project(project_dir: Path, apply: bool = False) -> list[str]:
             actions.append(f"CREATE  {filename}")
 
     return actions
+
+
+def scaffold_all(project_dir: Path, apply: bool = False) -> dict[Path, list[str]]:
+    """Discover all project roots and scaffold each one."""
+    all_roots = detect_all(project_dir)
+    results: dict[Path, list[str]] = {}
+    for root in sorted(all_roots):
+        rel = "." if root == project_dir else str(root.relative_to(project_dir))
+        click.echo(f"\n=== {rel} ===")
+        actions = scaffold_project(root, apply=apply)
+        results[root] = actions
+    return results

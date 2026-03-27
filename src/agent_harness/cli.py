@@ -131,10 +131,14 @@ def init(apply):
       agent-harness init            # diagnose only
       agent-harness init --apply    # diagnose and fix
     """
-    from agent_harness.init.scaffold import scaffold_project
+    from agent_harness.init.scaffold import scaffold_all
 
-    actions = scaffold_project(Path.cwd(), apply=apply)
-    for action in actions:
-        click.echo(f"  {action}")
-    if actions:
+    all_results = scaffold_all(Path.cwd(), apply=apply)
+    any_actions = False
+    for path, actions in sorted(all_results.items()):
+        for action in actions:
+            click.echo(f"  {action}")
+        if actions:
+            any_actions = True
+    if any_actions:
         click.echo("\n  Done. Run: make lint")

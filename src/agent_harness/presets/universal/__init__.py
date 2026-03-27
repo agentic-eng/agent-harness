@@ -42,6 +42,12 @@ class UniversalPreset(Preset):
             )
         )
         results.append(run_gitignore_tracked(project_dir))
+
+        from .precommit_check import run_precommit_check
+
+        results.append(
+            run_precommit_check(project_dir, git_root=config.get("git_root"))
+        )
         return results
 
     def run_fix(self, project_dir: Path, config: dict) -> list[str]:

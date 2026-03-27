@@ -1,5 +1,5 @@
 # tests/test_init.py
-from agent_harness.init.scaffold import scaffold_project
+from agent_harness.init.scaffold import scaffold_all, scaffold_project
 
 
 def test_scaffold_creates_files(tmp_path):
@@ -64,3 +64,34 @@ addopts = "--strict-markers --cov"
     assert "--cov-fail-under=95" in content
     assert "-v" in content
     assert any("FIXED" in a for a in actions)
+
+
+def test_scaffold_all_discovers_subprojects(tmp_path):
+    """scaffold_all finds and inits all project roots in a tree."""
+    # Root project
+    (tmp_path / "pyproject.toml").write_text("[project]\nname='root'")
+    # Subproject
+    sub = tmp_path / "services" / "api"
+    sub.mkdir(parents=True)
+    (sub / "pyproject.toml").write_text("[project]\nname='api'")
+
+    results = scaffold_all(tmp_path, apply=True)
+    assert tmp_path in results
+    assert sub in results
+    assert (tmp_path / ".agent-harness.yml").exists()
+    assert (sub / ".agent-harness.yml").exists()
+
+
+def test_scaffold_all_skips_already_initialized(tmp_path):
+    """scaffold_all skips subprojects that already have harness config."""
+    (tmp_path / "pyproject.toml").write_text("[project]\nname='root'")
+    (tmp_path / ".agent-harness.yml").write_text("stacks: [python]")
+
+    sub = tmp_path / "svc"
+    sub.mkdir()
+    (sub / "pyproject.toml").write_text("[project]\nname='svc'")
+
+    results = scaffold_all(tmp_path, apply=True)
+    # Root should skip .agent-harness.yml, sub should create it
+    assert any("SKIP" in a and ".agent-harness.yml" in a for a in results[tmp_path])
+    assert any("CREATE" in a and ".agent-harness.yml" in a for a in results[sub])
