@@ -71,6 +71,33 @@ fix:
 agent-harness init --apply    # auto-fix config + create missing files
 ```
 
+### Step 2.5: Audit CLAUDE.md
+
+Read the project's `CLAUDE.md` (if it exists). Check whether it includes these key workflow instructions. What to look for depends on the detected stacks:
+
+**All projects must mention:**
+- `make check` (or equivalent full quality gate command)
+- `make lint` or `agent-harness lint`
+- `make fix` or `agent-harness fix`
+- Pre-commit hooks run automatically
+- Never truncate lint/test output
+
+**Python projects should also mention:**
+- `make test` (with coverage)
+- `make coverage-diff` (diff-cover for changed lines)
+- If coverage-diff fails, write tests for uncovered changed lines
+
+**JavaScript projects should also mention:**
+- `make test`
+- Biome for formatting/linting
+
+**What to do:**
+- If CLAUDE.md doesn't exist: `agent-harness init --apply` will create one from template — no action needed.
+- If CLAUDE.md exists but is missing key instructions: propose targeted edits that fit the existing document's style and structure. Don't dump a template block — integrate naturally.
+- If CLAUDE.md already covers everything: move on.
+
+**Important:** This is an AI judgment call, not a mechanical check. Read the whole file, understand its structure, and add only what's missing in a way that flows with the existing content.
+
 ### Step 3: Install pre-commit hooks
 
 ```bash
