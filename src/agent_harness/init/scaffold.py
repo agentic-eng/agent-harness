@@ -68,12 +68,8 @@ def scaffold_project(project_dir: Path, apply: bool = False) -> list[str]:
     else:
         test_command = 'echo "no test command configured"'
 
-    is_javascript = "javascript" in stacks
     makefile_template = MAKEFILE_PYTHON if is_python else MAKEFILE
-    if is_javascript:
-        install_deps = "npm install"
-    else:
-        install_deps = 'echo "Install project dependencies first"'
+    install_deps = "# Install project dependencies (e.g., pnpm install, npm install)"
     project_name = project_dir.name
 
     files: dict[str, str] = {
