@@ -119,3 +119,39 @@ def init(apply):
             any_actions = True
     if any_actions:
         click.echo("\n  Done. Run: make lint")
+
+
+@cli.command("security-audit")
+@click.option(
+    "--base-branch",
+    default=None,
+    help="Base branch for dep diff (default: from config or origin/main)",
+)
+def security_audit(base_branch):
+    """Audit dependencies for known vulnerabilities.
+
+    Detects newly added packages and flags High/Critical CVEs that have
+    fixes available. Existing dependencies are warned but don't block.
+
+    Configure ignores in .agent-harness.yml under 'security.ignore'.
+    """
+    from agent_harness.config import load_config
+    from agent_harness.security.audit import run_security_audit
+    from agent_harness.security.display import format_report
+
+    cwd = Path.cwd()
+    config = load_config(cwd)
+
+    if base_branch:
+        config.setdefault("security", {})["base_branch"] = base_branch
+
+    stacks = config.get("stacks", set())
+    click.echo("Running security audit...")
+
+    report = run_security_audit(cwd, stacks=stacks, config=config)
+
+    for line in format_report(report):
+        click.echo(line)
+
+    if report.has_failures:
+        raise SystemExit(1)

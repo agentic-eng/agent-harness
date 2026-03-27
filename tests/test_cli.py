@@ -22,3 +22,11 @@ def test_audit_command_removed():
     result = runner.invoke(cli, ["audit"])
     assert result.exit_code != 0
     assert "No such command" in result.output or "Usage" in result.output
+
+
+def test_security_audit_command_exists():
+    """security-audit command is registered."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["security-audit", "--help"])
+    assert result.exit_code == 0
+    assert "security" in result.output.lower()
