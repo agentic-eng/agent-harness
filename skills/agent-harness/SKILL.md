@@ -145,3 +145,4 @@ Read these files when writing new Docker or Python code:
 
 - **`docker-guidance.md`** — healthcheck recipes, dependency chains, migration patterns, config file strategy, base image selection
 - **`python-guidance.md`** — why each pyproject.toml knob matters
+- **`monorepo-guidance.md`** — subproject pre-commit traps, redundant configs
