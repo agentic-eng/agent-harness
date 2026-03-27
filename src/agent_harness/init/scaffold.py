@@ -68,7 +68,12 @@ def scaffold_project(project_dir: Path, apply: bool = False) -> list[str]:
     else:
         test_command = 'echo "no test command configured"'
 
+    is_javascript = "javascript" in stacks
     makefile_template = MAKEFILE_PYTHON if is_python else MAKEFILE
+    if is_javascript:
+        install_deps = "npm install"
+    else:
+        install_deps = 'echo "Install project dependencies first"'
     project_name = project_dir.name
 
     files: dict[str, str] = {
@@ -77,7 +82,12 @@ def scaffold_project(project_dir: Path, apply: bool = False) -> list[str]:
         ),
         ".yamllint.yml": YAMLLINT_YML,
         ".pre-commit-config.yaml": PRECOMMIT_YML,
-        "Makefile": makefile_template.format(test_command=test_command),
+        "Makefile": makefile_template.format(
+            test_command=test_command,
+            install_deps=install_deps,
+        )
+        if not is_python
+        else makefile_template.format(test_command=test_command),
         "CLAUDE.md": CLAUDEMD.format(
             project_name=project_name,
             coverage_note=" (with coverage)" if is_python else "",

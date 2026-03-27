@@ -52,7 +52,7 @@ repos:
 """
 
 MAKEFILE = """\
-.PHONY: lint fix test check
+.PHONY: lint fix test check bootstrap
 
 lint:
 \tagent-harness lint
@@ -64,10 +64,18 @@ test:
 \t{test_command}
 
 check: lint test
+
+bootstrap: ## First-time setup after clone
+\t{install_deps}
+\tagent-harness init --apply
+\t@if command -v prek >/dev/null; then prek install; \\
+\telif command -v pre-commit >/dev/null; then pre-commit install; \\
+\telse echo "Install prek (brew install prek) or pre-commit for git hooks"; fi
+\t@echo "Done. Run 'make check' to verify."
 """
 
 MAKEFILE_PYTHON = """\
-.PHONY: lint fix test check coverage-diff
+.PHONY: lint fix test check coverage-diff bootstrap
 
 lint:
 \tagent-harness lint
@@ -82,6 +90,14 @@ coverage-diff:
 \t@uv run diff-cover coverage.xml --compare-branch=origin/main --fail-under=95
 
 check: lint test coverage-diff
+
+bootstrap: ## First-time setup after clone
+\tuv sync
+\tagent-harness init --apply
+\t@if command -v prek >/dev/null; then prek install; \\
+\telif command -v pre-commit >/dev/null; then pre-commit install; \\
+\telse echo "Install prek (brew install prek) or pre-commit for git hooks"; fi
+\t@echo "Done. Run 'make check' to verify."
 """
 
 CLAUDEMD = """\
@@ -94,6 +110,7 @@ make lint          # agent-harness lint (runs all checks, safe anytime)
 make fix           # auto-fix formatting, then lint
 make test          # run tests{coverage_note}
 make check         # full gate: lint + test{coverage_diff_note}
+make bootstrap     # first-time setup: deps + harness config + pre-commit hooks
 ```
 
 ## Workflow
