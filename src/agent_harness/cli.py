@@ -48,71 +48,62 @@ def print_results(results) -> int:
 
 @cli.command()
 @click.option(
-    "--all", "run_all", is_flag=True, help="Lint all subprojects (monorepo mode)"
+    "--all",
+    "run_all",
+    is_flag=True,
+    hidden=True,
+    help="Deprecated — discovery is now always on",
 )
 def lint(run_all):
-    """Run all harness checks."""
-    if run_all:
-        from agent_harness.lint import run_lint_all
+    """Run all harness checks (auto-discovers subprojects)."""
+    from agent_harness.lint import run_lint_all
 
-        cwd = Path.cwd()
-        all_results = run_lint_all(cwd)
-        total_exit = 0
-        for path, results in sorted(all_results.items()):
-            rel = "." if path == cwd else str(path.relative_to(cwd))
+    cwd = Path.cwd()
+    all_results = run_lint_all(cwd)
+    total_exit = 0
+    for path, results in sorted(all_results.items()):
+        rel = "." if path == cwd else str(path.relative_to(cwd))
+        if len(all_results) > 1:
             click.echo(f"\n=== {rel} ===")
-            exit_code = print_results(results)
-            if exit_code:
-                total_exit = 1
-        raise SystemExit(total_exit)
-    else:
-        from agent_harness.lint import run_lint
-
-        results = run_lint(Path.cwd())
-        raise SystemExit(print_results(results))
+        exit_code = print_results(results)
+        if exit_code:
+            total_exit = 1
+    raise SystemExit(total_exit)
 
 
 @cli.command()
 @click.option(
-    "--all", "run_all", is_flag=True, help="Fix all subprojects (monorepo mode)"
+    "--all",
+    "run_all",
+    is_flag=True,
+    hidden=True,
+    help="Deprecated — discovery is now always on",
 )
 def fix(run_all):
-    """Auto-fix what's fixable, then lint."""
-    if run_all:
-        from agent_harness.fix import run_fix_all
-        from agent_harness.lint import run_lint_all
+    """Auto-fix what's fixable, then lint (auto-discovers subprojects)."""
+    from agent_harness.fix import run_fix_all
+    from agent_harness.lint import run_lint_all
 
-        cwd = Path.cwd()
+    cwd = Path.cwd()
 
-        click.echo("Fixing...")
-        fix_results = run_fix_all(cwd)
-        for path, actions in sorted(fix_results.items()):
-            rel = "." if path == cwd else str(path.relative_to(cwd))
-            for a in actions:
-                click.echo(f"  {rel}: {a}")
-
-        click.echo("\nLinting...")
-        lint_results = run_lint_all(cwd)
-        total_exit = 0
-        for path, results in sorted(lint_results.items()):
-            rel = "." if path == cwd else str(path.relative_to(cwd))
-            click.echo(f"\n=== {rel} ===")
-            exit_code = print_results(results)
-            if exit_code:
-                total_exit = 1
-        raise SystemExit(total_exit)
-    else:
-        from agent_harness.fix import run_fix
-        from agent_harness.lint import run_lint
-
-        click.echo("Fixing...")
-        actions = run_fix(Path.cwd())
+    click.echo("Fixing...")
+    fix_results = run_fix_all(cwd)
+    for path, actions in sorted(fix_results.items()):
+        rel = "." if path == cwd else str(path.relative_to(cwd))
         for a in actions:
-            click.echo(f"  {a}")
+            click.echo(f"  {rel}: {a}")
 
-        click.echo("\nLinting...")
-        results = run_lint(Path.cwd())
-        raise SystemExit(print_results(results))
+    click.echo("\nLinting...")
+    lint_results = run_lint_all(cwd)
+    total_exit = 0
+    for path, results in sorted(lint_results.items()):
+        rel = "." if path == cwd else str(path.relative_to(cwd))
+        if len(lint_results) > 1:
+            click.echo(f"\n=== {rel} ===")
+        exit_code = print_results(results)
+        if exit_code:
+            total_exit = 1
+    raise SystemExit(total_exit)
 
 
 @cli.command()

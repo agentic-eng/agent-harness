@@ -38,7 +38,7 @@ repos:
     hooks:
       - id: harness-lint
         name: agent-harness lint
-        entry: agent-harness lint --all
+        entry: agent-harness lint
         language: system
         pass_filenames: false
         always_run: true
@@ -48,10 +48,10 @@ MAKEFILE = """\
 .PHONY: lint fix test
 
 lint:
-\tagent-harness lint --all
+\tagent-harness lint
 
 fix:
-\tagent-harness fix --all
+\tagent-harness fix
 
 test:
 \t{test_command}
