@@ -59,7 +59,7 @@ repos:
 """
 
 MAKEFILE = """\
-.PHONY: lint fix test check bootstrap
+.PHONY: lint fix test check security-audit bootstrap
 
 lint:
 \tagent-harness lint
@@ -70,7 +70,10 @@ fix:
 test:
 \t{test_command}
 
-check: lint test
+security-audit:
+\tagent-harness security-audit
+
+check: lint test security-audit
 
 bootstrap: ## First-time setup after clone
 \t{install_deps}
@@ -82,7 +85,7 @@ bootstrap: ## First-time setup after clone
 """
 
 MAKEFILE_PYTHON = """\
-.PHONY: lint fix test check coverage-diff bootstrap
+.PHONY: lint fix test check coverage-diff security-audit bootstrap
 
 lint:
 \tagent-harness lint
@@ -96,7 +99,10 @@ test:
 coverage-diff:
 \t@uv run diff-cover coverage.xml --compare-branch=origin/main --fail-under=95
 
-check: lint test coverage-diff
+security-audit:
+\tagent-harness security-audit
+
+check: lint test coverage-diff security-audit
 
 bootstrap: ## First-time setup after clone
 \tuv sync
@@ -116,7 +122,8 @@ CLAUDEMD = """\
 make lint          # agent-harness lint (runs all checks, safe anytime)
 make fix           # auto-fix formatting, then lint
 make test          # run tests{coverage_note}
-make check         # full gate: lint + test{coverage_diff_note}
+make security-audit   # check deps for known vulnerabilities
+make check         # full gate: lint + test{coverage_diff_note} + security-audit
 make bootstrap     # first-time setup: deps + harness config + pre-commit hooks
 ```
 

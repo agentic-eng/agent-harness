@@ -26,9 +26,12 @@ class PythonPreset(Preset):
         return results
 
     def run_setup(self, project_dir, config):
+        from .security_setup import check_python_security_setup
         from .setup_check import check_python_setup
 
-        return check_python_setup(project_dir)
+        issues = check_python_setup(project_dir)
+        issues.extend(check_python_security_setup(project_dir))
+        return issues
 
     def run_fix(self, project_dir: Path, config: dict) -> list[str]:
         from .fix import run_python_fix
