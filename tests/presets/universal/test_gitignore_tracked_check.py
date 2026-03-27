@@ -5,69 +5,52 @@ from agent_harness.presets.universal.gitignore_tracked_check import (
 )
 
 
-def _init_git(tmp_path):
-    subprocess.run(["git", "init"], cwd=str(tmp_path), capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@test.com"],
-        cwd=str(tmp_path),
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test"],
-        cwd=str(tmp_path),
-        capture_output=True,
-    )
-
-
-def test_clean_repo_passes(tmp_path):
+def test_clean_repo_passes(git_repo):
     """No tracked-but-ignored files -> pass."""
-    _init_git(tmp_path)
-    (tmp_path / ".gitignore").write_text("*.log\n")
-    (tmp_path / "hello.py").write_text("print('hi')\n")
-    subprocess.run(["git", "add", "."], cwd=str(tmp_path), capture_output=True)
+    (git_repo / ".gitignore").write_text("*.log\n")
+    (git_repo / "hello.py").write_text("print('hi')\n")
+    subprocess.run(["git", "add", "."], cwd=str(git_repo), capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "init"],
-        cwd=str(tmp_path),
+        cwd=str(git_repo),
         capture_output=True,
     )
-    result = run_gitignore_tracked(tmp_path)
+    result = run_gitignore_tracked(git_repo)
     assert result.passed
 
 
-def test_tracked_ignored_file_fails(tmp_path):
+def test_tracked_ignored_file_fails(git_repo):
     """A tracked file matching .gitignore -> fail with file listed."""
-    _init_git(tmp_path)
-    (tmp_path / "debug.log").write_text("log\n")
-    subprocess.run(["git", "add", "debug.log"], cwd=str(tmp_path), capture_output=True)
+    (git_repo / "debug.log").write_text("log\n")
+    subprocess.run(["git", "add", "debug.log"], cwd=str(git_repo), capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "add log"],
-        cwd=str(tmp_path),
+        cwd=str(git_repo),
         capture_output=True,
     )
     # Now add .gitignore that excludes it
-    (tmp_path / ".gitignore").write_text("*.log\n")
-    subprocess.run(["git", "add", ".gitignore"], cwd=str(tmp_path), capture_output=True)
+    (git_repo / ".gitignore").write_text("*.log\n")
+    subprocess.run(["git", "add", ".gitignore"], cwd=str(git_repo), capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "add gitignore"],
-        cwd=str(tmp_path),
+        cwd=str(git_repo),
         capture_output=True,
     )
-    result = run_gitignore_tracked(tmp_path)
+    result = run_gitignore_tracked(git_repo)
     assert not result.passed
     assert "debug.log" in result.error
 
 
-def test_no_gitignore_passes(tmp_path):
+def test_no_gitignore_passes(git_repo):
     """No .gitignore at all -> pass (nothing is ignored)."""
-    _init_git(tmp_path)
-    (tmp_path / "hello.py").write_text("print('hi')\n")
-    subprocess.run(["git", "add", "."], cwd=str(tmp_path), capture_output=True)
+    (git_repo / "hello.py").write_text("print('hi')\n")
+    subprocess.run(["git", "add", "."], cwd=str(git_repo), capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "init"],
-        cwd=str(tmp_path),
+        cwd=str(git_repo),
         capture_output=True,
     )
-    result = run_gitignore_tracked(tmp_path)
+    result = run_gitignore_tracked(git_repo)
     assert result.passed
 
 
@@ -77,26 +60,25 @@ def test_not_a_git_repo_passes(tmp_path):
     assert result.passed
 
 
-def test_monorepo_subproject_detects_tracked_ignored(tmp_path):
+def test_monorepo_subproject_detects_tracked_ignored(git_repo):
     """Root .gitignore applies to subproject — tracked-ignored file caught."""
-    _init_git(tmp_path)
     # Subproject with a .log file — committed before .gitignore exists
-    subproject = tmp_path / "services" / "api"
+    subproject = git_repo / "services" / "api"
     subproject.mkdir(parents=True)
     (subproject / "debug.log").write_text("log\n")
     (subproject / "app.py").write_text("print('hi')\n")
-    subprocess.run(["git", "add", "."], cwd=str(tmp_path), capture_output=True)
+    subprocess.run(["git", "add", "."], cwd=str(git_repo), capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "init"],
-        cwd=str(tmp_path),
+        cwd=str(git_repo),
         capture_output=True,
     )
     # Now add root .gitignore that excludes *.log
-    (tmp_path / ".gitignore").write_text("*.log\n")
-    subprocess.run(["git", "add", ".gitignore"], cwd=str(tmp_path), capture_output=True)
+    (git_repo / ".gitignore").write_text("*.log\n")
+    subprocess.run(["git", "add", ".gitignore"], cwd=str(git_repo), capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "add gitignore"],
-        cwd=str(tmp_path),
+        cwd=str(git_repo),
         capture_output=True,
     )
     # Run check from subproject dir — should detect the tracked-ignored file
@@ -105,17 +87,16 @@ def test_monorepo_subproject_detects_tracked_ignored(tmp_path):
     assert "debug.log" in result.error
 
 
-def test_monorepo_subproject_clean(tmp_path):
+def test_monorepo_subproject_clean(git_repo):
     """Root .gitignore applies — subproject with no violations passes."""
-    _init_git(tmp_path)
-    (tmp_path / ".gitignore").write_text("*.log\n")
-    subproject = tmp_path / "services" / "api"
+    (git_repo / ".gitignore").write_text("*.log\n")
+    subproject = git_repo / "services" / "api"
     subproject.mkdir(parents=True)
     (subproject / "app.py").write_text("print('hi')\n")
-    subprocess.run(["git", "add", "."], cwd=str(tmp_path), capture_output=True)
+    subprocess.run(["git", "add", "."], cwd=str(git_repo), capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "init"],
-        cwd=str(tmp_path),
+        cwd=str(git_repo),
         capture_output=True,
     )
     result = run_gitignore_tracked(subproject)
