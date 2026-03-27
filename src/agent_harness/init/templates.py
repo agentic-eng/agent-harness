@@ -38,18 +38,6 @@ repos:
     hooks:
       - id: harness-lint
         name: agent-harness lint
-        entry: agent-harness lint
-        language: system
-        pass_filenames: false
-        always_run: true
-"""
-
-PRECOMMIT_YML_ALL = """\
-repos:
-  - repo: local
-    hooks:
-      - id: harness-lint
-        name: agent-harness lint (all subprojects)
         entry: agent-harness lint --all
         language: system
         pass_filenames: false
@@ -57,19 +45,6 @@ repos:
 """
 
 MAKEFILE = """\
-.PHONY: lint fix test
-
-lint:
-\tagent-harness lint
-
-fix:
-\tagent-harness fix
-
-test:
-\t{test_command}
-"""
-
-MAKEFILE_ALL = """\
 .PHONY: lint fix test
 
 lint:
