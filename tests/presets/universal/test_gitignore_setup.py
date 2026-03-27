@@ -64,3 +64,24 @@ def test_fix_creates_gitignore_if_missing(tmp_path):
     content = (tmp_path / ".gitignore").read_text()
     assert ".DS_Store" in content
     assert "__pycache__" in content
+
+
+def test_monorepo_subproject_no_gitignore(tmp_path):
+    """Subproject without own .gitignore -> flagged as missing.
+
+    In a monorepo, the root .gitignore covers subprojects. But the setup
+    check runs per-subproject and looks for a local .gitignore. This test
+    documents the current behavior: subprojects without their own .gitignore
+    are flagged.
+    """
+    # Root has .gitignore
+    (tmp_path / ".gitignore").write_text(".DS_Store\n__pycache__/\n")
+    # Subproject has no .gitignore
+    subproject = tmp_path / "services" / "api"
+    subproject.mkdir(parents=True)
+    (subproject / "pyproject.toml").write_text("[project]\nname='api'\n")
+
+    issues = check_gitignore_setup(subproject, stacks={"python"})
+    # Currently flags as missing — documents known monorepo limitation
+    assert len(issues) == 1
+    assert "No .gitignore found" in issues[0].message
