@@ -26,7 +26,7 @@ class DockerPreset(Preset):
                 project_dir, config.get("docker", {}).get("own_image_prefix", "")
             )
         )
-        results.append(run_hadolint(project_dir))
+        results.extend(run_hadolint(project_dir))
         return results
 
     def run_fix(self, project_dir: Path, config: dict) -> list[str]:
