@@ -80,5 +80,17 @@ class UniversalPreset(Preset):
                     "conftest",
                     "brew install conftest",
                 ),
+                ToolInfo(
+                    "osv-scanner",
+                    "dependency vulnerability scanning",
+                    "osv-scanner",
+                    "brew install osv-scanner",
+                ),
+                ToolInfo(
+                    "gitleaks",
+                    "secret detection in code and git history",
+                    "gitleaks",
+                    "brew install gitleaks",
+                ),
             ],
         )
