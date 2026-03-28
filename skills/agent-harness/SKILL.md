@@ -38,6 +38,8 @@ Before applying, read every Makefile in the project (root + all subprojects). Sk
 
 6. **Stale targets.** Bootstrap targets that install tools agent-harness manages, test targets with different flags than what's in pyproject.toml, etc.
 
+7. **Redundant security tooling.** If a Makefile target runs `pip-audit`, `npm audit`, or `gitleaks` directly, replace with `agent-harness security-audit` which combines dependency scanning + secret detection in one command.
+
 **What to do with findings:**
 
 - Present all findings as a numbered list before applying fixes
@@ -70,6 +72,15 @@ fix:
 ```bash
 agent-harness init --apply    # auto-fix config + create missing files
 ```
+
+### Step 2.7: Review .gitignore
+
+After `init --apply` appends missing patterns, review the full `.gitignore`:
+- Remove patterns for stacks no longer in the project (e.g., Dagster patterns in a project that no longer uses Dagster)
+- Consolidate duplicates that init couldn't detect (near-matches, overlapping globs)
+- Reorganize into logical category sections if the file has grown disorganized
+
+This is a judgment call — init does the safe mechanical work (grouped append), the agent does the contextual cleanup.
 
 ### Step 2.5: Audit CLAUDE.md
 
