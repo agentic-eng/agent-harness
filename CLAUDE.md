@@ -90,10 +90,24 @@ Every check belongs in exactly one place. The boundary:
 - Checks configuration QUALITY. Can auto-fix.
 - Examples: threshold = 50% (recommend 90-95%), missing `-v` flag
 
-### Same topic, both places
-A single topic (e.g., coverage threshold) can have both:
-- Lint Rego: "does the gate exist? Is it >= 30%?" (broken gate detection)
-- Init Python: "is the value optimal? fix to 95%" (quality + auto-fix)
+### Skill (agent guidance, context-dependent)
+- Actions that require judgment, context, or reading intent.
+- The skill tells the agent WHAT to evaluate and WHY, but the agent decides HOW.
+- Examples: reorganize .gitignore (needs to know which patterns are stale),
+  audit CLAUDE.md (needs project context), replace redundant Makefile targets
+  (needs to understand what the target was for)
+
+### The boundary: init does, skill guides
+Init must be safe to run blindly (`--apply` never breaks a project).
+If an action could destroy user intent (rewriting .gitignore, editing CLAUDE.md),
+init does the safe subset (deduplicated append) and the skill guides the agent
+to do the rest (full cleanup, reorganization).
+
+### Same topic, all three places
+A single topic (e.g., .gitignore completeness) can have:
+- Lint Rego: "are generated files tracked?" (objectively broken)
+- Init Python: "append missing patterns grouped by category" (safe, mechanical)
+- Skill: "review and clean up the full .gitignore — remove stale patterns, reorganize" (judgment)
 
 ## Never
 
