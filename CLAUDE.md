@@ -33,7 +33,7 @@ agent-harness lint             # verify everything passes
 
 ```
 src/agent_harness/
-  cli.py               — Click CLI: detect, init, lint, fix (thin — delegates)
+  cli.py               — Click CLI: detect, init, lint, fix, security-audit (thin — delegates)
   config.py            — Dict-based config from .agent-harness.yml
   runner.py            — run_check(), CheckResult, tool_available()
   conftest.py          — Shared conftest runner (used by all Rego checks)
@@ -51,6 +51,7 @@ src/agent_harness/
     javascript/        — Biome, framework type checker, conftest on package.json
     docker/            — hadolint, conftest on Dockerfile + compose
     dokploy/           — conftest for Traefik/Dokploy conventions
+  security/            — osv-scanner + gitleaks runners, policy engine, CVE ignore
   policies/            — Rego policies (bundled). Each has WHAT/WHY/FIX.
 
 skills/agent-harness/  — Claude Code plugin (SKILL.md + guidance docs)
