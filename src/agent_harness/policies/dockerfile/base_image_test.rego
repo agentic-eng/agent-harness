@@ -33,3 +33,12 @@ test_python_slim_passes if {
 		{"Cmd": "from", "Value": ["python:3.12-bookworm-slim"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
 	]
 }
+
+# ── EXCEPTION: skip via exceptions list ──
+
+test_exception_skips_base_image if {
+	count(base_image.deny) == 0 with input as [
+		{"Cmd": "from", "Value": ["python:3.12-alpine"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
+	]
+		with data.exceptions as ["dockerfile.base_image"]
+}

@@ -33,3 +33,12 @@ test_non_dep_run_passes if {
 		{"Cmd": "run", "Value": ["echo hello"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
 	]
 }
+
+# ── EXCEPTION: skip via exceptions list ──
+
+test_exception_skips_cache if {
+	count(cache.deny) == 0 with input as [
+		{"Cmd": "run", "Value": ["uv sync"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
+	]
+		with data.exceptions as ["dockerfile.cache"]
+}

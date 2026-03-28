@@ -19,9 +19,16 @@ package dockerfile.user
 
 import rego.v1
 
+default _exceptions := []
+
+_exceptions := data.exceptions if {
+	data.exceptions
+}
+
 # ── Policy: must have USER instruction ──
 
 deny contains msg if {
+	not "dockerfile.user" in _exceptions
 	not _has_user_instruction
 	msg := "Dockerfile has no USER instruction — containers should not run as root. Add 'USER nonroot' or similar."
 }

@@ -42,3 +42,14 @@ test_copy_from_stage_passes if {
 		{"Cmd": "run", "Value": ["uv sync"], "Flags": [], "Stage": 1, "SubCmd": "", "JSON": false},
 	]
 }
+
+# ── EXCEPTION: skip via exceptions list ──
+
+test_exception_skips_layers if {
+	count(layers.deny) == 0 with input as [
+		{"Cmd": "from", "Value": ["python:3.12-slim"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
+		{"Cmd": "copy", "Value": [".", "."], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
+		{"Cmd": "run", "Value": ["uv sync"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
+	]
+		with data.exceptions as ["dockerfile.layers"]
+}

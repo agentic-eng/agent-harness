@@ -19,12 +19,19 @@ package dockerfile.base_image
 
 import rego.v1
 
+default _exceptions := []
+
+_exceptions := data.exceptions if {
+	data.exceptions
+}
+
 # Stacks where musl causes native extension breakage
 musl_problem_stacks := {"python", "python3", "uv", "node", "ruby"}
 
 # ── Policy: no Alpine for musl-sensitive stacks ──
 
 deny contains msg if {
+	not "dockerfile.base_image" in _exceptions
 	some instr in input
 	instr.Cmd == "from"
 	image := instr.Value[0]

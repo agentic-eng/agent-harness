@@ -36,3 +36,12 @@ test_normal_env_passes if {
 		{"Cmd": "env", "Value": ["NODE_ENV=production"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
 	]
 }
+
+# ── EXCEPTION: skip via exceptions list ──
+
+test_exception_skips_secrets if {
+	count(secrets.deny) == 0 with input as [
+		{"Cmd": "env", "Value": ["API_KEY=abc123"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
+	]
+		with data.exceptions as ["dockerfile.secrets"]
+}

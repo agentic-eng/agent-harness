@@ -21,3 +21,13 @@ test_with_user_passes if {
 		{"Cmd": "user", "Value": ["nonroot"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
 	]
 }
+
+# ── EXCEPTION: skip via exceptions list ──
+
+test_exception_skips_user if {
+	count(user.deny) == 0 with input as [
+		{"Cmd": "from", "Value": ["python:3.12-slim"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
+		{"Cmd": "run", "Value": ["uv sync"], "Flags": [], "Stage": 0, "SubCmd": "", "JSON": false},
+	]
+		with data.exceptions as ["dockerfile.user"]
+}

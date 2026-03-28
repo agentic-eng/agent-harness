@@ -18,11 +18,18 @@ package dockerfile.cache
 
 import rego.v1
 
+default _exceptions := []
+
+_exceptions := data.exceptions if {
+	data.exceptions
+}
+
 dep_install_pattern := `(uv sync|pip install|pip3 install|poetry install|pdm install|npm ci|npm install|yarn install|pnpm install|bun install|go mod download|cargo build|cargo install|bundle install|gem install)`
 
 # ── Policy: dep install must use --mount=type=cache ──
 
 deny contains msg if {
+	not "dockerfile.cache" in _exceptions
 	some instr in input
 	instr.Cmd == "run"
 

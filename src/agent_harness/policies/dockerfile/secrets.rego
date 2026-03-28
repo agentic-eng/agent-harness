@@ -19,6 +19,12 @@ package dockerfile.secrets
 
 import rego.v1
 
+default _exceptions := []
+
+_exceptions := data.exceptions if {
+	data.exceptions
+}
+
 # Suspicious key patterns (case-insensitive matching via regex)
 secret_patterns := [
 	"password",
@@ -38,6 +44,7 @@ secret_patterns := [
 # ── Policy: no secrets in ENV ──
 
 deny contains msg if {
+	not "dockerfile.secrets" in _exceptions
 	some instr in input
 	instr.Cmd == "env"
 	some val in instr.Value
@@ -52,6 +59,7 @@ deny contains msg if {
 # ── Policy: no secrets in ARG ──
 
 deny contains msg if {
+	not "dockerfile.secrets" in _exceptions
 	some instr in input
 	instr.Cmd == "arg"
 	some val in instr.Value

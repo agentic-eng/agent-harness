@@ -19,6 +19,12 @@ package dockerfile.layers
 
 import rego.v1
 
+default _exceptions := []
+
+_exceptions := data.exceptions if {
+	data.exceptions
+}
+
 # ── Dependency manifest files (copying these before install is correct) ──
 dep_manifests := {
 	"pyproject.toml", "uv.lock", "requirements.txt", "Pipfile", "Pipfile.lock",
@@ -39,6 +45,7 @@ dep_install_pattern := `(uv sync|pip install|pip3 install|poetry install|pdm ins
 # ── Policy: no broad COPY before dependency install ──
 
 deny contains msg if {
+	not "dockerfile.layers" in _exceptions
 	# Find a broad COPY instruction
 	some i, copy_instr in input
 	copy_instr.Cmd == "copy"

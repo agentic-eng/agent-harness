@@ -18,9 +18,16 @@ package dockerfile.healthcheck
 
 import rego.v1
 
+default _exceptions := []
+
+_exceptions := data.exceptions if {
+	data.exceptions
+}
+
 # ── Policy: must have HEALTHCHECK instruction ──
 
 deny contains msg if {
+	not "dockerfile.healthcheck" in _exceptions
 	not _has_healthcheck
 	msg := "Dockerfile has no HEALTHCHECK instruction — orchestrators can't detect unhealthy containers. Add 'HEALTHCHECK CMD curl -f http://localhost/ || exit 1' or similar."
 }
