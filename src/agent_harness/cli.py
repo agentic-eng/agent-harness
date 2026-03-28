@@ -127,11 +127,19 @@ def init(apply):
     default=None,
     help="Base branch for dep diff (default: from config or origin/main)",
 )
-def security_audit(base_branch):
-    """Audit dependencies for known vulnerabilities.
+@click.option(
+    "--full-history",
+    is_flag=True,
+    help="Scan full git history for secrets (slower, catches deleted secrets)",
+)
+def security_audit(base_branch, full_history):
+    """Audit dependencies and scan for leaked secrets.
 
     Detects newly added packages and flags High/Critical CVEs that have
     fixes available. Existing dependencies are warned but don't block.
+
+    Also scans for leaked secrets (working directory by default,
+    full git history with --full-history).
 
     Configure ignores in .agent-harness.yml under 'security.ignore'.
     """
@@ -146,9 +154,12 @@ def security_audit(base_branch):
         config.setdefault("security", {})["base_branch"] = base_branch
 
     stacks = config.get("stacks", set())
-    click.echo("Running security audit...")
+    mode = "full history" if full_history else "working directory"
+    click.echo(f"Running security audit ({mode})...")
 
-    report = run_security_audit(cwd, stacks=stacks, config=config)
+    report = run_security_audit(
+        cwd, stacks=stacks, config=config, full_history=full_history
+    )
 
     for line in format_report(report):
         click.echo(line)

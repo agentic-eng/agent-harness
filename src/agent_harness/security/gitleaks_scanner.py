@@ -9,28 +9,35 @@ from pathlib import Path
 from agent_harness.security.models import AuditFinding
 
 
-def run_gitleaks(project_dir: Path) -> str | None:
+def run_gitleaks(project_dir: Path, *, full_history: bool = False) -> str | None:
     """Run gitleaks and return JSON output, or None if unavailable.
 
-    Scans full git history. Uses .gitleaksignore for fingerprint-based
-    suppression only — no path or regex allowlists.
+    By default scans working directory only (--no-git, fast).
+    With full_history=True, scans full git history (slow, catches deleted secrets).
+    Uses .gitleaksignore for fingerprint-based suppression only.
     """
+    cmd = [
+        "gitleaks",
+        "detect",
+        "--source",
+        str(project_dir),
+        "--report-format",
+        "json",
+        "--report-path",
+        "/dev/stdout",
+    ]
+    if not full_history:
+        cmd.append("--no-git")
+
+    timeout = 300 if full_history else 60
+
     try:
         result = subprocess.run(
-            [
-                "gitleaks",
-                "detect",
-                "--source",
-                str(project_dir),
-                "--report-format",
-                "json",
-                "--report-path",
-                "/dev/stdout",
-            ],
+            cmd,
             capture_output=True,
             text=True,
             cwd=str(project_dir),
-            timeout=300,  # 5 min — full history scan can be slow
+            timeout=timeout,
         )
         # gitleaks exits 1 when leaks found, 0 when clean
         if result.returncode == 0:

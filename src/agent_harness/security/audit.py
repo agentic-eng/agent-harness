@@ -14,6 +14,8 @@ def run_security_audit(
     project_dir: Path,
     stacks: set[str],
     config: dict,
+    *,
+    full_history: bool = False,
 ) -> SecurityReport:
     """Run security audit using osv-scanner and gitleaks."""
     sec_config = load_security_config(config)
@@ -24,7 +26,7 @@ def run_security_audit(
         all_findings = parse_osv_output(output, sec_config.base_branch, project_dir)
 
     # Secret detection
-    gitleaks_output = run_gitleaks(project_dir)
+    gitleaks_output = run_gitleaks(project_dir, full_history=full_history)
     if gitleaks_output is not None:
         all_findings.extend(parse_gitleaks_output(gitleaks_output))
 
