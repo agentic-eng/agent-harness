@@ -33,13 +33,24 @@ def run_gitleaks(project_dir: Path) -> str | None:
             timeout=300,  # 5 min — full history scan can be slow
         )
         # gitleaks exits 1 when leaks found, 0 when clean
-        # If stdout is empty and exit code is 0, no leaks
         if result.returncode == 0:
             return "[]"  # No leaks found
-        if result.stdout:
+        if result.returncode == 1 and result.stdout:
             return result.stdout
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        pass
+        if result.returncode > 1:
+            import click
+
+            click.echo(f"  WARN  gitleaks failed (exit {result.returncode})", err=True)
+            if result.stderr:
+                click.echo(f"         {result.stderr.strip()[:200]}", err=True)
+    except FileNotFoundError:
+        import click
+
+        click.echo("  SKIP  gitleaks not installed (brew install gitleaks)", err=True)
+    except subprocess.TimeoutExpired:
+        import click
+
+        click.echo("  WARN  gitleaks timed out after 300s", err=True)
     return None
 
 

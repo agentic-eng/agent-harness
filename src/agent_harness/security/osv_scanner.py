@@ -34,8 +34,24 @@ def run_osv_scanner(project_dir: Path) -> str | None:
         # osv-scanner exits 1 when vulns found — that's expected
         if result.stdout:
             return result.stdout
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        pass
+        if result.returncode not in (0, 1):
+            import click
+
+            click.echo(
+                f"  WARN  osv-scanner failed (exit {result.returncode})", err=True
+            )
+            if result.stderr:
+                click.echo(f"         {result.stderr.strip()[:200]}", err=True)
+    except FileNotFoundError:
+        import click
+
+        click.echo(
+            "  SKIP  osv-scanner not installed (brew install osv-scanner)", err=True
+        )
+    except subprocess.TimeoutExpired:
+        import click
+
+        click.echo("  WARN  osv-scanner timed out after 120s", err=True)
     return None
 
 
@@ -72,16 +88,6 @@ def _extract_severity(vuln: dict) -> str:
     return "unknown"
 
 
-def _has_fix(vuln: dict) -> bool:
-    """Check if a vulnerability has a known fix version."""
-    for affected in vuln.get("affected", []):
-        for range_entry in affected.get("ranges", []):
-            for event in range_entry.get("events", []):
-                if "fixed" in event:
-                    return True
-    return False
-
-
 def _get_fix_versions(vuln: dict) -> list[str]:
     """Extract fix versions from vulnerability data."""
     versions = []
@@ -96,8 +102,12 @@ def _get_fix_versions(vuln: dict) -> list[str]:
 def is_new_package(package_name: str, base_branch: str, project_dir: Path) -> bool:
     """Check if a package is new (not in the base branch's lockfiles).
 
-    Simple string search in base branch lockfile content.
+    Searches for the quoted package name to avoid substring matches
+    (e.g., "requests" matching "requests-toolbelt"). Lockfiles always
+    quote package names: uv.lock uses `name = "pkg"`, package-lock.json
+    uses `"pkg":` as a key.
     """
+    quoted_name = f'"{package_name.lower()}"'
     for lockfile in LOCKFILES:
         result = subprocess.run(
             ["git", "show", f"{base_branch}:{lockfile}"],
@@ -105,7 +115,7 @@ def is_new_package(package_name: str, base_branch: str, project_dir: Path) -> bo
             text=True,
             cwd=str(project_dir),
         )
-        if result.returncode == 0 and package_name.lower() in result.stdout.lower():
+        if result.returncode == 0 and quoted_name in result.stdout.lower():
             return False
     return True
 

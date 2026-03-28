@@ -7,7 +7,6 @@ import pytest
 
 from agent_harness.security.osv_scanner import (
     _extract_severity,
-    _has_fix,
     is_new_package,
     parse_osv_output,
 )
@@ -21,25 +20,6 @@ def test_extract_severity_from_database_specific():
 def test_extract_severity_unknown():
     vuln = {}
     assert _extract_severity(vuln) == "unknown"
-
-
-def test_has_fix_true():
-    vuln = {
-        "affected": [
-            {"ranges": [{"events": [{"introduced": "0"}, {"fixed": "1.0.1"}]}]}
-        ]
-    }
-    assert _has_fix(vuln) is True
-
-
-def test_has_fix_false():
-    vuln = {"affected": [{"ranges": [{"events": [{"introduced": "0"}]}]}]}
-    assert _has_fix(vuln) is False
-
-
-def test_has_fix_no_affected():
-    vuln = {}
-    assert _has_fix(vuln) is False
 
 
 def test_parse_osv_output_basic():
@@ -173,3 +153,18 @@ def test_is_new_package_false(git_repo):
     subprocess.run(["git", "branch", "main"], cwd=str(git_repo), capture_output=True)
 
     assert is_new_package("requests", "main", git_repo) is False
+
+
+def test_is_new_package_no_substring_match(git_repo):
+    """'requests' in lockfile should NOT match 'requests-toolbelt'."""
+    (git_repo / "uv.lock").write_text(
+        '[[package]]\nname = "requests"\nversion = "2.0"\n'
+    )
+    subprocess.run(["git", "add", "."], cwd=str(git_repo), capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "init"], cwd=str(git_repo), capture_output=True
+    )
+    subprocess.run(["git", "branch", "main"], cwd=str(git_repo), capture_output=True)
+
+    # requests-toolbelt is NOT in the lockfile — should be detected as new
+    assert is_new_package("requests-toolbelt", "main", git_repo) is True
