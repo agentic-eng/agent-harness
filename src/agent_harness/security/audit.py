@@ -6,6 +6,7 @@ from pathlib import Path
 
 from agent_harness.security.config import load_security_config
 from agent_harness.security.models import AuditFinding, SecurityReport
+from agent_harness.security.gitleaks_scanner import parse_gitleaks_output, run_gitleaks
 from agent_harness.security.osv_scanner import parse_osv_output, run_osv_scanner
 
 
@@ -14,13 +15,18 @@ def run_security_audit(
     stacks: set[str],
     config: dict,
 ) -> SecurityReport:
-    """Run security audit using osv-scanner."""
+    """Run security audit using osv-scanner and gitleaks."""
     sec_config = load_security_config(config)
     all_findings: list[AuditFinding] = []
 
     output = run_osv_scanner(project_dir)
     if output is not None:
         all_findings = parse_osv_output(output, sec_config.base_branch, project_dir)
+
+    # Secret detection
+    gitleaks_output = run_gitleaks(project_dir)
+    if gitleaks_output is not None:
+        all_findings.extend(parse_gitleaks_output(gitleaks_output))
 
     return SecurityReport(
         findings=all_findings,

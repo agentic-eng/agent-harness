@@ -158,7 +158,7 @@ Agent-harness auto-detects project stacks (Python, JavaScript, Docker, Dokploy) 
 
 - **lint** — Fast enforcement every commit. "Is this gate broken?" Checks: ruff, ty, conftest policies, yamllint, file length, gitignore tracked files, pre-commit hooks.
 - **init** — On-demand diagnostic. "Is this gate configured well?" Checks config quality, gitignore completeness, CLAUDE.md workflow, missing tools.
-- **security-audit** — Dep vulnerability scan. "Are any new deps dangerous?" Only blocks on new + High/Critical + fix available. Runs in `make check`, not in lint.
+- **security-audit** — Dep vulnerabilities + secret detection. Blocks on: (1) new deps with High/Critical CVE + fix available, (2) any leaked secret in git history. Runs in `make check`, not in lint.
 
 When a user challenges a lint rule, read the WHY block from the check file or Rego policy. When a user challenges an init recommendation, check `presets/*/setup.py` for the check logic.
 
