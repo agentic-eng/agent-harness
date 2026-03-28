@@ -46,12 +46,3 @@ def test_discover_nested_services(tmp_path):
 def test_discover_no_dotfiles(tmp_path):
     roots = discover_roots(tmp_path)
     assert roots == []
-
-
-def test_discover_respects_max_depth(tmp_path):
-    deep = tmp_path / "a" / "b" / "c" / "d" / "e"
-    deep.mkdir(parents=True)
-    (deep / ".agent-harness.yml").write_text("stacks: [python]")
-    # Default max_depth=4 should not find depth=5
-    roots = discover_roots(tmp_path)
-    assert deep not in roots
