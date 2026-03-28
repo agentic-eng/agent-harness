@@ -113,6 +113,16 @@ prek install
 If neither prek nor pre-commit is available, tell the user to install one:
 `brew install prek` or `pip install pre-commit`.
 
+### Step 3.5: Deep security scan
+
+Run a one-time full git history scan for leaked secrets. This is slow (10-60s) but catches secrets that were committed and later deleted.
+
+```bash
+agent-harness security-audit-history
+```
+
+If secrets are found, they must be rotated (not just deleted). Add fingerprints to `.gitleaksignore` only for confirmed false positives — never for real secrets, never for entire paths or regex patterns.
+
 ### Step 4: Verify
 
 ```bash
@@ -135,7 +145,8 @@ Present a clear summary of what was done, what passed, and any remaining issues 
 - `agent-harness lint` — Lint all subprojects (monorepo mode)
 - `agent-harness fix` — Auto-fix what's fixable (ruff format/check --fix), then lint
 - `agent-harness detect` — Show detected stacks and subprojects
-- `agent-harness security-audit` — Audit deps for known vulnerabilities (requires network)
+- `agent-harness security-audit` — Scan working dir for vulnerable deps + leaked secrets (fast, for `make check`)
+- `agent-harness security-audit-history` — Deep scan full git history for leaked secrets (slow, run once at setup)
 
 ## When to Use
 
@@ -158,7 +169,8 @@ Agent-harness auto-detects project stacks (Python, JavaScript, Docker, Dokploy) 
 
 - **lint** — Fast enforcement every commit. "Is this gate broken?" Checks: ruff, ty, conftest policies, yamllint, file length, gitignore tracked files, pre-commit hooks.
 - **init** — On-demand diagnostic. "Is this gate configured well?" Checks config quality, gitignore completeness, CLAUDE.md workflow, missing tools.
-- **security-audit** — Dep vulnerabilities + secret detection. Blocks on: (1) new deps with High/Critical CVE + fix available, (2) any leaked secret in git history. Runs in `make check`, not in lint.
+- **security-audit** — Dep vulnerabilities + secret detection (working dir). Blocks on: (1) new deps with High/Critical CVE + fix available, (2) any leaked secret. Runs in `make check`, not in lint.
+- **security-audit-history** — Deep scan of full git history for secrets committed and later deleted. Run once during setup, then periodically in CI.
 
 When a user challenges a lint rule, read the WHY block from the check file or Rego policy. When a user challenges an init recommendation, check `presets/*/setup.py` for the check logic.
 

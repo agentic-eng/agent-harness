@@ -30,3 +30,11 @@ def test_security_audit_command_exists():
     result = runner.invoke(cli, ["security-audit", "--help"])
     assert result.exit_code == 0
     assert "security" in result.output.lower()
+
+
+def test_security_audit_history_command_exists():
+    """security-audit-history command is registered."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["security-audit-history", "--help"])
+    assert result.exit_code == 0
+    assert "history" in result.output.lower()

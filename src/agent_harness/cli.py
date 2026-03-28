@@ -121,28 +121,8 @@ def init(apply):
         click.echo("\n  Done. Run: make lint")
 
 
-@cli.command("security-audit")
-@click.option(
-    "--base-branch",
-    default=None,
-    help="Base branch for dep diff (default: from config or origin/main)",
-)
-@click.option(
-    "--full-history",
-    is_flag=True,
-    help="Scan full git history for secrets (slower, catches deleted secrets)",
-)
-def security_audit(base_branch, full_history):
-    """Audit dependencies and scan for leaked secrets.
-
-    Detects newly added packages and flags High/Critical CVEs that have
-    fixes available. Existing dependencies are warned but don't block.
-
-    Also scans for leaked secrets (working directory by default,
-    full git history with --full-history).
-
-    Configure ignores in .agent-harness.yml under 'security.ignore'.
-    """
+def _run_audit(base_branch: str | None, full_history: bool) -> None:
+    """Shared logic for security audit commands."""
     from agent_harness.config import load_config
     from agent_harness.security.audit import run_security_audit
     from agent_harness.security.display import format_report
@@ -166,3 +146,34 @@ def security_audit(base_branch, full_history):
 
     if report.has_failures:
         raise SystemExit(1)
+
+
+@cli.command("security-audit")
+@click.option(
+    "--base-branch",
+    default=None,
+    help="Base branch for dep diff (default: from config or origin/main)",
+)
+def security_audit(base_branch):
+    """Scan working directory for vulnerabilities and leaked secrets.
+
+    Checks deps for known CVEs (blocks new deps with High/Critical + fix).
+    Scans working directory for secrets. Fast, safe for every commit.
+    """
+    _run_audit(base_branch, full_history=False)
+
+
+@cli.command("security-audit-history")
+@click.option(
+    "--base-branch",
+    default=None,
+    help="Base branch for dep diff (default: from config or origin/main)",
+)
+def security_audit_history(base_branch):
+    """Deep scan full git history for leaked secrets.
+
+    Same as security-audit but also scans all past commits for secrets
+    that were committed and later deleted. Slower (10-60s). Run once
+    during setup or periodically in CI.
+    """
+    _run_audit(base_branch, full_history=True)
