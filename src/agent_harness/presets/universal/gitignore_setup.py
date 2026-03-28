@@ -120,9 +120,41 @@ def check_gitignore_setup(
         current = gitignore_path.read_text()
         if not current.endswith("\n"):
             current += "\n"
-        block = "\n# Added by agent-harness\n"
-        for pattern in sorted(missing):
-            block += pattern + "\n"
+
+        block = ""
+        for os_template in _OS_TEMPLATES:
+            template_patterns = _load_template(os_template)
+            template_missing = missing & template_patterns
+            if template_missing:
+                label = os_template.replace(".gitignore", "")
+                block += f"\n# {label} (added by agent-harness)\n"
+                for pattern in sorted(template_missing):
+                    block += pattern + "\n"
+
+        for stack in sorted(stacks):
+            template_name = _STACK_TEMPLATES.get(stack)
+            if template_name:
+                template_patterns = _load_template(template_name)
+                template_missing = missing & template_patterns
+                if template_missing:
+                    label = template_name.replace(".gitignore", "")
+                    block += f"\n# {label} (added by agent-harness)\n"
+                    for pattern in sorted(template_missing):
+                        block += pattern + "\n"
+
+        accounted = set()
+        for os_template in _OS_TEMPLATES:
+            accounted |= _load_template(os_template)
+        for stack in stacks:
+            template_name = _STACK_TEMPLATES.get(stack)
+            if template_name:
+                accounted |= _load_template(template_name)
+        uncategorized = missing - accounted
+        if uncategorized:
+            block += "\n# Other (added by agent-harness)\n"
+            for pattern in sorted(uncategorized):
+                block += pattern + "\n"
+
         gitignore_path.write_text(current + block)
 
     return [

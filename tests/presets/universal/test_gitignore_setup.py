@@ -49,7 +49,7 @@ def test_fix_appends_missing_patterns(tmp_path):
     assert ".env" in content
     # New patterns appended
     assert ".DS_Store" in content
-    assert "# Added by agent-harness" in content
+    assert "(added by agent-harness)" in content
 
 
 def test_fix_creates_gitignore_if_missing(tmp_path):
@@ -64,6 +64,21 @@ def test_fix_creates_gitignore_if_missing(tmp_path):
     content = (tmp_path / ".gitignore").read_text()
     assert ".DS_Store" in content
     assert "__pycache__" in content
+
+
+def test_fix_appends_grouped_by_template(tmp_path):
+    """Fix should group appended patterns by source template."""
+    (tmp_path / ".gitignore").write_text("# My rules\n.env\n")
+    issues = check_gitignore_setup(tmp_path, stacks={"python"})
+    fixable = [i for i in issues if i.fixable]
+    assert len(fixable) > 0
+    for issue in fixable:
+        assert issue.fix is not None
+        issue.fix(tmp_path)
+    content = (tmp_path / ".gitignore").read_text()
+    assert "(added by agent-harness)" in content
+    # Should have multiple category headers
+    assert "macOS" in content or "Windows" in content or "Linux" in content
 
 
 def test_monorepo_subproject_uses_root_gitignore(tmp_path):
