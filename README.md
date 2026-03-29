@@ -291,7 +291,7 @@ MIT — see [LICENSE](LICENSE).
 ---
 
 <p align="center">
-  <sub>🦎 Why a lizard? Cold-blooded, deterministic, no feelings — survived 200 million years by not negotiating. Neither does your linter.</sub>
+  <sub>🦎 Cold-blooded enforcement since 2026.</sub>
 </p>
 <p align="center">
   <sub>Built by <a href="https://github.com/iorlas">Denis Tomilin</a> at <a href="https://github.com/agentic-eng">Agentic Engineering</a></sub>
