@@ -43,6 +43,15 @@ def _resolve_hooks_dir(git_root: Path) -> Path:
 
 def run_precommit_check(project_dir: Path, git_root: Path | None = None) -> CheckResult:
     """Check that pre-commit hooks are installed if config exists."""
+    import os
+
+    if os.environ.get("CI"):
+        return CheckResult(
+            name="precommit-hooks",
+            passed=True,
+            output="Skipping in CI — CI is the quality gate",
+        )
+
     check_dir = git_root if git_root else project_dir
 
     config_path = check_dir / ".pre-commit-config.yaml"
