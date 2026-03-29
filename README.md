@@ -12,6 +12,8 @@
   <p align="center">
     <a href="https://pypi.org/project/agentic-harness/"><img src="https://img.shields.io/pypi/v/agentic-harness" alt="PyPI"></a>
     <a href="https://github.com/agentic-eng/agent-harness/actions/workflows/ci.yml"><img src="https://github.com/agentic-eng/agent-harness/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+    <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0"></a>
+    <a href="https://python.org"><img src="https://img.shields.io/badge/python-3.12%2B-blue.svg" alt="Python 3.12+"></a>
   </p>
   <p align="center">
     <a href="#quick-start">Quick Start</a> &middot;
@@ -25,6 +27,18 @@
 > **PyPI:** Install as `agentic-harness` — the `agent-harness` name is reserved by an unrelated abandoned package ([transfer pending](https://github.com/pypi/support/issues)). CLI command is `agent-harness`.
 
 ---
+
+```
+Agent: writes Dockerfile, commits
+  ↓
+agent-harness lint → FAIL: no USER directive, no HEALTHCHECK, COPY . . before pip install
+  ↓
+Agent: reads errors, fixes all three, re-lints
+  ↓
+agent-harness lint → 10 passed, 0 failed (476ms)
+  ↓
+Agent: commits clean code. No human involved.
+```
 
 Dockerfiles without USER directives. Compose files without healthchecks. Secrets hardcoded in ENV. Dependency caches busted on every build. Coverage gates that don't exist. Formatters that never run.
 
