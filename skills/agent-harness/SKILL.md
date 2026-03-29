@@ -7,109 +7,203 @@ description: "Deterministic quality gates for AI agents. Use when setting up a p
 
 Deterministic controls (linters, type checkers, formatters, coverage gates) that constrain AI agent behavior automatically.
 
-## Setup Workflow (when user says "set up harness", "apply harness", or first time in a project)
+## The Experience
 
-This is a committed action. Once the user asks for setup, execute the full plan — don't stop to ask permission at each step. Present a summary at the end.
+Agent Harness setup is a guided process. You scan, plan, and execute — nothing is silently skipped, nothing is assumed OK. The user sees every decision.
 
-### Step 1: Diagnose
+**Three phases:**
+
+```
+Phase 1: DISCOVER     →  Phase 2: PLAN        →  Phase 3: EXECUTE
+Scan everything.         Present A→B diff.        Apply approved changes.
+Challenge what's odd.    Get approval.             Verify. Report.
+```
+
+---
+
+## Phase 1: Discover
+
+Scan the full project state. Present every finding — even "looks good" gets a line.
+
+### 1.1 Detect stacks and subprojects
 
 ```bash
-agent-harness detect          # see what stacks are detected
-agent-harness init            # diagnose issues (report mode)
+agent-harness detect
 ```
 
-### Step 1.5: Audit existing Makefiles and pre-commit hooks
+Report what was detected and what was NOT detected. If a stack seems missing (e.g., Dockerfile exists but Docker not detected), say so.
 
-Before applying, read every Makefile in the project (root + all subprojects). Skip dependency directories (node_modules, .venv, vendor, dist). Also read `.pre-commit-config.yaml` if it exists.
-
-**What to look for:**
-
-1. **Duplicated work.** If a subproject Makefile runs `ruff`, `ty`, `biome`, `hadolint`, or any tool that agent-harness already runs — that's duplication. The subproject's `make lint` should delegate to `agent-harness lint`, not invoke tools directly. Flag every instance.
-
-2. **Bypassed tools.** If a Makefile runs `ruff` but NOT `ty` (or vice versa), an agent using that Makefile skips a gate. This is how type errors slip through — the agent runs the local `make lint`, gets a pass from ruff alone, and commits broken code.
-
-3. **Conflicting fix targets.** If a subproject's `make fix` runs `ruff format` but the root's `make fix` runs `agent-harness fix` (which also runs ruff), files may be formatted twice or with conflicting configs.
-
-4. **Missing delegation.** The root Makefile should call `agent-harness lint` (not individual tools). Subproject Makefiles should either delegate to `agent-harness lint` or to the root's `make lint` — never run tools independently.
-
-5. **Pre-commit hook misalignment.** If `.pre-commit-config.yaml` runs `make lint` but the Makefile's lint target doesn't include agent-harness, the hook is bypassed. The hook should run `make lint` and `make lint` should run `agent-harness lint`.
-
-6. **Missing fix-before-lint in pre-commit.** The pre-commit config should run `agent-harness fix` (or `make fix`) BEFORE `agent-harness lint`. This auto-formats code before committing instead of failing and requiring a manual fix step. If the config only has a lint hook, add a fix hook before it.
-
-6. **Stale targets.** Bootstrap targets that install tools agent-harness manages, test targets with different flags than what's in pyproject.toml, etc.
-
-7. **Redundant security tooling.** If a Makefile target runs `pip-audit`, `npm audit`, or `gitleaks` directly, replace with `agent-harness security-audit` which combines dependency scanning + secret detection in one command.
-
-**What to do with findings:**
-
-- Present all findings as a numbered list before applying fixes
-- For each finding, state what's wrong and what the fix should be
-- Propose Makefile rewrites that consolidate to agent-harness
-- Execute the fixes — don't ask permission for each one
-- If a subproject Makefile has non-lint targets (test, deploy, migrate) that are fine, leave those alone — only fix the lint/fix/check targets
-
-**Example of a bad subproject Makefile:**
-```makefile
-lint:
-    @uv run ruff format --check
-    @uv run ruff check
-    @uv run ty check     # <- agent-harness already runs all three
-fix:
-    uv run ruff check --fix
-    uv run ruff format   # <- agent-harness fix does this
-```
-
-**Example of a good subproject Makefile:**
-```makefile
-lint:
-    @agent-harness lint
-fix:
-    @agent-harness fix
-```
-
-### Step 2: Apply fixes
+### 1.2 Run diagnostics
 
 ```bash
-agent-harness init --apply    # auto-fix config + create missing files
+agent-harness init            # report mode — no changes
 ```
 
-### Step 2.5: Audit CLAUDE.md
+Capture the output. This is the baseline.
 
-Read the project's `CLAUDE.md` (if it exists). Check whether it includes these key workflow instructions. What to look for depends on the detected stacks:
+### 1.3 Audit Makefiles
+
+Read every Makefile in the project (root + all subprojects). Skip `node_modules`, `.venv`, `vendor`, `dist`. Also read `.pre-commit-config.yaml` if it exists.
+
+**Check each of these — report findings for ALL, not just failures:**
+
+| Check | What to look for |
+|-------|-----------------|
+| Duplicated work | Makefile runs tools agent-harness already runs (`ruff`, `ty`, `biome`, `hadolint`) |
+| Bypassed tools | Makefile runs `ruff` but not `ty` (or vice versa) — skipping a gate |
+| Conflicting fix targets | Multiple `make fix` targets running same formatter with different configs |
+| Missing delegation | Root Makefile should call `agent-harness lint`, not individual tools |
+| Pre-commit misalignment | Hook runs `make lint` but Makefile doesn't include agent-harness |
+| Missing fix-before-lint | Pre-commit should run fix BEFORE lint |
+| Stale targets | Bootstrap targets for tools agent-harness manages |
+| Redundant security tooling | `pip-audit`, `npm audit`, or `gitleaks` targets — replace with `agent-harness security-audit` |
+
+### 1.4 Audit CLAUDE.md
+
+Read `CLAUDE.md` (if it exists). Check for these instructions:
 
 **All projects must mention:**
-- `make check` (or equivalent full quality gate command)
+- `make check` (or full quality gate command)
 - `make lint` or `agent-harness lint`
 - `make fix` or `agent-harness fix`
 - Pre-commit hooks run automatically
 - Never truncate lint/test output
 
-**Python projects should also mention:**
+**Python projects must also mention:**
 - `make test` (with coverage)
-- `make coverage-diff` (diff-cover for changed lines)
-- If coverage-diff fails, write tests for uncovered changed lines
+- `make coverage-diff` (diff-cover)
 
-**JavaScript projects should also mention:**
+**JavaScript projects must also mention:**
 - `make test`
 - Biome for formatting/linting
 
-**What to do:**
-- If CLAUDE.md doesn't exist: `agent-harness init --apply` will create one from template — no action needed.
-- If CLAUDE.md exists but is missing key instructions: propose targeted edits that fit the existing document's style and structure. Don't dump a template block — integrate naturally.
-- If CLAUDE.md already covers everything: move on.
+Report: "CLAUDE.md covers X, Y, Z. Missing: A, B."
 
-**Important:** This is an AI judgment call, not a mechanical check. Read the whole file, understand its structure, and add only what's missing in a way that flows with the existing content.
+### 1.5 Audit .gitignore
 
-### Step 2.6: Review .gitignore
+Check completeness against stack templates. Report:
+- How many patterns exist vs expected
+- Any stale patterns for stacks no longer in the project
+- Any duplicates or near-duplicates
 
-After `init --apply` appends missing patterns, review the full `.gitignore`:
-- Remove patterns for stacks no longer in the project (e.g., Dagster patterns in a project that no longer uses Dagster)
-- Consolidate duplicates that init couldn't detect (near-matches, overlapping globs)
-- Reorganize into logical category sections if the file has grown disorganized
+### 1.6 Check security tooling
 
-This is a judgment call — init does the safe mechanical work (grouped append), the agent does the contextual cleanup.
+```bash
+agent-harness security-audit
+```
 
-### Step 3: Install pre-commit hooks
+Report dependency vulnerabilities and any detected secrets.
+
+### 1.7 Check pre-commit hooks
+
+Report whether hooks are installed, what they run, and whether they align with agent-harness.
+
+---
+
+### Discovery Report
+
+After all checks, present a structured report:
+
+```
+## Discovery Report
+
+### Stacks: Python, Docker (2 subprojects detected)
+
+### Findings
+
+✅ .agent-harness.yml — exists, stacks correct
+⚠️  Makefile — runs `ruff` directly instead of `agent-harness lint`
+⚠️  Makefile — has `pip-audit` target, redundant with `agent-harness security-audit`
+✅ .pre-commit-config.yaml — fix-before-lint, correct hooks
+⚠️  CLAUDE.md — mentions lint but not `make check`
+✅ .gitignore — 142 patterns, complete for Python + macOS
+⚠️  .gitignore — 12 Dagster patterns from removed stack
+✅ Security audit — no vulnerabilities, no secrets
+❌ Pre-commit hooks — not installed
+
+### Summary: 4 findings to address, 4 checks passed
+```
+
+Every check produces a line. ✅ for pass, ⚠️ for fixable, ❌ for blocking.
+
+---
+
+## Phase 2: Plan
+
+Present the changes needed to go from current state (A) to target state (B). Group by file.
+
+### 2.1 Present the plan
+
+```
+## Setup Plan
+
+### Makefile (rewrite lint/fix/check targets)
+
+Current:
+  lint: @uv run ruff format --check && @uv run ruff check
+  fix: uv run ruff check --fix && uv run ruff format
+
+Proposed:
+  lint: @agent-harness lint
+  fix: @agent-harness fix
+  check: @agent-harness lint && uv run pytest tests/ -v && agent-harness security-audit
+
+Reason: Makefile runs ruff directly, bypassing ty and conftest.
+Agent-harness runs all three. Consolidate.
+
+### Makefile (remove pip-audit target)
+
+Current: audit: @uvx pip-audit
+Proposed: (remove — agent-harness security-audit covers this)
+
+### CLAUDE.md (add make check reference)
+
+Add: "Full quality gate: `make check` — runs lint, test, security-audit."
+
+### .gitignore (remove 12 stale Dagster patterns)
+
+Remove lines 45-56 (Dagster patterns — stack removed from project).
+
+### Pre-commit hooks (install)
+
+Run: prek install
+
+### agent-harness init --apply
+
+Creates/updates: .agent-harness.yml, .yamllint.yml
+```
+
+### 2.2 Challenge questionable setups
+
+If anything looks intentional but wrong, ask about it:
+
+> "Your Makefile has a `deploy` target that runs `docker compose up -d` without checking lint first. Is this intentional, or should deploy depend on `make check`?"
+
+Challenge by reasoning first (internally), then presenting the question. Don't challenge obvious things — only things where the user's intent is ambiguous.
+
+### 2.3 Get approval
+
+> "This is the full plan — N changes across M files. Approve to proceed, or tell me what to adjust."
+
+Wait for explicit approval before making any changes.
+
+---
+
+## Phase 3: Execute
+
+Apply all approved changes, verify, report.
+
+### 3.1 Apply init fixes
+
+```bash
+agent-harness init --apply
+```
+
+### 3.2 Apply Makefile and config changes
+
+Execute each change from the approved plan. For judgment calls (CLAUDE.md edits, .gitignore cleanup), integrate naturally — don't dump template blocks.
+
+### 3.3 Install pre-commit hooks
 
 ```bash
 prek install                  # or: pre-commit install
@@ -121,73 +215,100 @@ git config --unset-all --local core.hooksPath
 prek install
 ```
 
-If neither prek nor pre-commit is available, tell the user to install one:
-`brew install prek` or `pip install pre-commit`.
-
-### Step 3.5: Deep security scan
-
-Run a one-time full git history scan for leaked secrets. This is slow (10-60s) but catches secrets that were committed and later deleted.
+### 3.4 Deep security scan (first time only)
 
 ```bash
 agent-harness security-audit-history
 ```
 
-If secrets are found, they must be rotated (not just deleted). Add fingerprints to `.gitleaksignore` only for confirmed false positives — never for real secrets, never for entire paths or regex patterns.
+If secrets are found, they must be rotated. Add fingerprints to `.gitleaksignore` only for confirmed false positives.
 
-### Step 4: Verify
+### 3.5 Verify
 
 ```bash
-make lint                     # must pass — if it doesn't, fix issues
+make check                    # must pass — full quality gate
 ```
 
-### Step 5: Commit
+If it fails, fix issues and re-run until green.
 
-Commit all generated/modified config files (`.agent-harness.yml`, `.yamllint.yml`, `.pre-commit-config.yaml`, `.gitignore` changes, `Makefile`).
+### 3.6 Commit
 
-### Step 6: Report
+Commit all generated/modified config files.
 
-Present a clear summary of what was done, what passed, and any remaining issues that need manual attention. Do NOT ask "want me to fix these?" — list what you will fix and do it. Only stop for issues that require a human decision (e.g., choosing a coverage threshold).
+### 3.7 Report
 
-## Commands
+Present the final report:
 
-- `agent-harness init` — Diagnose harness setup (report mode)
-- `agent-harness init --apply` — Apply auto-fixes and create missing config files
-- `agent-harness lint` — Run all harness checks (fast, pass/fail, blocks commits)
-- `agent-harness lint` — Lint all subprojects (monorepo mode)
-- `agent-harness fix` — Auto-fix what's fixable (ruff format/check --fix), then lint
-- `agent-harness detect` — Show detected stacks and subprojects
-- `agent-harness security-audit` — Scan working dir for vulnerable deps + leaked secrets (fast, for `make check`)
-- `agent-harness security-audit-history` — Deep scan full git history for leaked secrets (slow, run once at setup)
+```
+## Setup Complete
+
+### Changes made
+- Makefile: consolidated lint/fix/check targets to agent-harness
+- Makefile: removed redundant pip-audit target
+- CLAUDE.md: added make check reference
+- .gitignore: removed 12 stale Dagster patterns
+- .pre-commit-config.yaml: created (fix + lint hooks)
+- .agent-harness.yml: created (stacks: python, docker)
+- .yamllint.yml: created
+- Pre-commit hooks: installed
+
+### Verification
+- make check: ✅ PASSED (10 lint checks, 45 tests, security audit clean)
+
+### Skipped (with reason)
+- .gitignore append: no missing patterns (already complete)
+- Biome config: not a JavaScript project
+
+### Manual attention needed
+- None
+```
+
+Every action taken gets a line. Every check skipped gets a line with a reason. Nothing is invisible.
+
+---
+
+## Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| `agent-harness detect` | Show detected stacks and subprojects |
+| `agent-harness init` | Diagnose setup (report mode) |
+| `agent-harness init --apply` | Apply auto-fixes and create missing config files |
+| `agent-harness lint` | Run all checks — fast, pass/fail, blocks commits |
+| `agent-harness fix` | Auto-fix (ruff, biome), then lint |
+| `agent-harness security-audit` | Scan working dir for vulnerable deps + leaked secrets |
+| `agent-harness security-audit-history` | Deep scan full git history for leaked secrets (slow, run once) |
 
 ## When to Use
 
-- Setting up a new project — run the **Setup Workflow** above
-- Lint failures — run `agent-harness lint`, read error messages, fix issues
-- Monorepo with multiple subprojects — run `agent-harness lint`
-- Checking config quality after changes — run `agent-harness init`
+- **Setting up a project** — run the full 3-phase experience above
+- **Lint failures** — `agent-harness lint`, read errors, fix
+- **After changing configs** — `agent-harness init` to re-diagnose
+- **Monorepo** — all commands auto-discover subprojects
 
 ## When NOT to Use
 
-- Business logic, architecture, or domain modeling
+- Business logic, architecture, domain modeling
 - Deployment operations (use deployment-platform skill)
-- Fixing one specific tool config (help directly)
+- Fixing one specific tool (help directly, don't run full setup)
 
 ## How It Works
 
-Agent-harness auto-detects project stacks (Python, JavaScript, Docker, Dokploy) and runs the right checks. Every error message is actionable — read it, fix it, re-lint.
+Agent-harness auto-detects project stacks (Python, JavaScript, Docker, Dokploy) and runs the right checks. Every error message is actionable.
 
-### Three modes, clean separation
+### Three layers
 
-- **lint** — Fast enforcement every commit. "Is this gate broken?" Checks: ruff, ty, conftest policies, yamllint, file length, gitignore tracked files, pre-commit hooks.
-- **init** — On-demand diagnostic. "Is this gate configured well?" Checks config quality, gitignore completeness, CLAUDE.md workflow, missing tools.
-- **security-audit** — Dep vulnerabilities + secret detection (working dir). Blocks on: (1) new deps with High/Critical CVE + fix available, (2) any leaked secret. Runs in `make check`, not in lint.
-- **security-audit-history** — Deep scan of full git history for secrets committed and later deleted. Run once during setup, then periodically in CI.
+| Layer | What | When |
+|-------|------|------|
+| **lint** | "Is this gate broken?" Ruff, ty, conftest, yamllint, file length, gitignore, pre-commit | Every commit |
+| **init** | "Is this gate configured well?" Config quality, completeness, missing tools | On-demand |
+| **skill** | "Is this setup optimal?" Judgment calls — CLAUDE.md audit, .gitignore cleanup, Makefile consolidation | During setup |
 
-When a user challenges a lint rule, read the WHY block from the check file or Rego policy. When a user challenges an init recommendation, check `presets/*/setup.py` for the check logic.
+When a user challenges a lint rule, read the WHY block from the check file or Rego policy. When a user challenges an init recommendation, check `presets/*/setup.py`.
 
 ## Conftest Exceptions
 
-Individual conftest policies can be skipped per file via `conftest_skip` in `.agent-harness.yml`. Use when a file legitimately violates a policy (e.g., a utility Dockerfile that must run as root).
+Individual conftest policies can be skipped per file via `conftest_skip` in `.agent-harness.yml`:
 
 ```yaml
 docker:
@@ -223,9 +344,10 @@ docker:
 
 ## Monorepo Support
 
-- `agent-harness lint` auto-discovers subprojects and runs checks in each
-- Git root is resolved automatically — gitignore and pre-commit checks use the repo root, not the subproject directory
+- `agent-harness lint` auto-discovers subprojects via git-aware file discovery
+- Git root is resolved automatically — gitignore and pre-commit checks use the repo root
 - Each subproject can have its own `.agent-harness.yml` for stack overrides
+- Docker preset discovers all Dockerfiles in the tree (not just root)
 
 ## Guidance
 
