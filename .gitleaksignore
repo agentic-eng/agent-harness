@@ -1,2 +1,0 @@
-# Test fixture — intentionally contains fake API key for conftest policy testing
-tests/fixtures/dockerfile/bad_secret_in_env.Dockerfile:generic-api-key:5
