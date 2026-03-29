@@ -1,6 +1,14 @@
 import subprocess
 
+import pytest
+
 from agent_harness.presets.universal.precommit_check import run_precommit_check
+
+
+@pytest.fixture(autouse=True)
+def _no_ci_env(monkeypatch):
+    """Ensure CI env var is unset so precommit check runs normally in tests."""
+    monkeypatch.delenv("CI", raising=False)
 
 
 def test_no_config_passes(git_repo):
