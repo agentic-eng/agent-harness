@@ -1,10 +1,10 @@
 <p align="center">
-  <h1 align="center">Agent Harness</h1>
+  <h1 align="center">🦎 Agent Harness</h1>
   <p align="center">
     <em>Enforce. Enforce. Enforce.</em>
   </p>
   <p align="center">
-    <strong>Stop the slop. AI agents aren't sloppy — the toolchains they inherit are.</strong>
+    <strong>Stop the slop. AI agents aren't sloppy — the human toolchains they inherited are.</strong>
   </p>
   <p align="center">
     44 rules &middot; 5 stacks &middot; <500ms &middot; Zero config
@@ -290,6 +290,9 @@ MIT — see [LICENSE](LICENSE).
 
 ---
 
+<p align="center">
+  <sub>🦎 Why a lizard? Cold-blooded, deterministic, no feelings — survived 200 million years by not negotiating. Neither does your linter.</sub>
+</p>
 <p align="center">
   <sub>Built by <a href="https://github.com/iorlas">Denis Tomilin</a> at <a href="https://github.com/agentic-eng">Agentic Engineering</a></sub>
 </p>
