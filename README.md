@@ -1,6 +1,9 @@
 <p align="center">
   <h1 align="center">Agent Harness</h1>
   <p align="center">
+    <em>Enforce. Enforce. Enforce.</em>
+  </p>
+  <p align="center">
     <strong>AI agents aren't sloppy. The toolchains they inherit are.</strong>
   </p>
   <p align="center">
