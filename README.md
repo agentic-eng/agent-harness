@@ -291,7 +291,7 @@ MIT — see [LICENSE](LICENSE).
 ---
 
 <p align="center">
-  <sub>🦎 Cold-blooded enforcement since mid-25.</sub>
+  <sub>🦎 Cold-blooded enforcement since mid 2025.</sub>
 </p>
 <p align="center">
   <sub>Built by <a href="https://github.com/iorlas">Denis Tomilin</a> at <a href="https://github.com/agentic-eng">Agentic Engineering</a></sub>
