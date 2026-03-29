@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">Agent Harness</h1>
   <p align="center">
-    <strong>Deterministic quality gates for AI-assisted development</strong>
+    <strong>AI agents aren't sloppy. The toolchains they inherit are.</strong>
   </p>
   <p align="center">
     44 rules &middot; 5 stacks &middot; <500ms &middot; Zero config
@@ -12,19 +12,22 @@
   </p>
   <p align="center">
     <a href="#quick-start">Quick Start</a> &middot;
+    <a href="#the-problem">The Problem</a> &middot;
     <a href="#stacks">Stacks</a> &middot;
     <a href="#for-ai-agents">For AI Agents</a> &middot;
     <a href="#contributing">Contributing</a>
   </p>
 </p>
 
-> **Note:** The PyPI package is `agentic-harness` (the `agent-harness` name is taken by an unrelated abandoned project — transfer pending). The CLI command is still `agent-harness`.
+> **PyPI:** Install as `agentic-harness` — the `agent-harness` name is reserved by an unrelated abandoned package ([transfer pending](https://github.com/pypi/support/issues)). CLI command is `agent-harness`.
 
 ---
 
-AI agents generate code in loops. Each iteration can introduce misconfigurations, missing healthchecks, bad Dockerfile layering, or secrets in git — and the agent won't know unless something tells it.
+Dockerfiles without USER directives. Compose files without healthchecks. Secrets hardcoded in ENV. Dependency caches busted on every build. Coverage gates that don't exist. Formatters that never run.
 
-**Agent Harness is that something.** One CLI that detects your project stack, runs all quality checks, and gives agents actionable error messages they can fix without human intervention.
+This isn't the AI's fault. These are **human-built toolchains with decades of accumulated slop** — implicit defaults, silent failures, missing guardrails. Humans learned to work around them through tribal knowledge. AI agents don't have tribal knowledge. They just hit the wall.
+
+**Agent Harness is the wall that talks back.** One CLI, deterministic feedback, actionable error messages. Every rule exists because an AI agent made that exact mistake — and will keep making it until something stops it.
 
 ```
 $ agent-harness lint
@@ -41,19 +44,23 @@ $ agent-harness lint
 8 passed, 0 failed (476ms)
 ```
 
-## Why
+## The Problem
 
-Agents need tight feedback loops. The tighter and more deterministic the feedback, the more effective the agent.
+AI agents are as good as the feedback they get. Human toolchains give terrible feedback — or none at all.
 
-| Without harness | With harness |
-|---|---|
-| Agent commits `.env` with real secrets | `.gitignore` policy catches it before commit |
-| Dockerfile rebuilds all deps every push | Layer ordering policy enforces correct `COPY` order |
-| `pytest.mark.untit` silently selects nothing | Strict markers policy catches the typo |
-| Compose healthcheck missing, deploy "succeeds" | Healthcheck policy fails the lint |
-| Agent reformats code differently each iteration | Formatter runs on every check, enforcing consistency |
+| The slop | What the agent does | What the harness does |
+|---|---|---|
+| `.gitignore` is "optional" | Commits `.env` with real secrets | Policy catches it before commit |
+| Dockerfile layer order is tribal knowledge | `COPY . .` before `pip install` — 5min rebuilds | Layer ordering policy enforces correct order |
+| `pytest.mark.untit` silently selects nothing | Thinks tests pass (zero ran) | Strict markers policy catches the typo |
+| Compose healthcheck is "recommended" | Deploy "succeeds," service is dead | Healthcheck policy fails the lint |
+| Formatters exist but nobody runs them | Reformats differently each iteration | Formatter runs on every commit, enforcing consistency |
 
-An agent can't act on *"consider using healthchecks."* It can act on *"FAIL: services.api missing healthcheck — add `healthcheck:` block."* That's the difference between documentation and a harness.
+An agent can't act on *"consider using healthchecks."* It can act on *"FAIL: services.api missing healthcheck — add `healthcheck:` block."*
+
+That's the difference between documentation and a harness. Documentation hopes. A harness enforces.
+
+> We'll build AI-first frameworks eventually. Until then, agents have to work with what humans built. Agent Harness makes that survivable.
 
 ## Quick Start
 
