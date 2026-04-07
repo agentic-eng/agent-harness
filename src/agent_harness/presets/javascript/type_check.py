@@ -33,11 +33,7 @@ FRAMEWORK_DEPS = {
 
 
 def detect_framework(project_dir: Path) -> str | None:
-    """Detect JS framework from package.json dependencies and project markers."""
-    # Wasp projects have a .wasproot sentinel file
-    if (project_dir / ".wasproot").exists():
-        return "wasp"
-
+    """Detect JS framework from package.json dependencies."""
     pkg_path = project_dir / "package.json"
     if not pkg_path.exists():
         return None
@@ -56,30 +52,6 @@ def detect_framework(project_dir: Path) -> str | None:
 def run_type_check(project_dir: Path) -> CheckResult:
     """Run the best available type checker for this project."""
     framework = detect_framework(project_dir)
-
-    if framework == "wasp":
-        # Wasp generates its TypeScript SDK via `wasp compile` (undocumented).
-        # Run it first to produce .wasp/out/sdk/wasp/, then tsc can type-check.
-        if shutil.which("wasp"):
-            compile_result = run_check(
-                "typecheck:wasp-compile", ["wasp", "compile"], cwd=str(project_dir)
-            )
-            if not compile_result.passed:
-                return compile_result
-            # SDK generated — now run tsc
-            if shutil.which("tsc"):
-                return run_check(
-                    "typecheck:wasp", ["tsc", "--noEmit"], cwd=str(project_dir)
-                )
-            return run_check(
-                "typecheck:wasp", ["npx", "tsc", "--noEmit"], cwd=str(project_dir)
-            )
-        return CheckResult(
-            name="typecheck:wasp",
-            passed=False,
-            output="wasp CLI not found. Install with: npm i -g @wasp.sh/wasp-cli@latest",
-            duration_ms=0,
-        )
 
     if framework == "astro":
         if shutil.which("astro"):
