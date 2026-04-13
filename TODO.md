@@ -19,7 +19,7 @@ Open questions and unchallenged assumptions from the initial build session.
 
 ## Distribution
 
-- **Publish policies as conftest OCI bundle.** `conftest pull oci://ghcr.io/agentic-eng/agent-harness-policies:v1`. For projects that want policies without the CLI.
+- **Publish policies as conftest OCI bundle.** `conftest pull oci://ghcr.io/yoselabs/agent-harness-policies:v1`. For projects that want policies without the CLI.
 - **Marketplace agent skill.** Distribute as a Claude Code / Cursor skill that wraps agent-harness.
 - **PyPI publish.** Reserve `agent-harness` name. Reclaim `agent-harness` via PEP 541 (abandoned since Sep 2023).
 

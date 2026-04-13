@@ -26,9 +26,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/agentic-eng/agent-harness"
-Repository = "https://github.com/agentic-eng/agent-harness"
-Issues = "https://github.com/agentic-eng/agent-harness/issues"
+Homepage = "https://github.com/yoselabs/agent-harness"
+Repository = "https://github.com/yoselabs/agent-harness"
+Issues = "https://github.com/yoselabs/agent-harness/issues"
 
 [project.scripts]
 agent-harness = "agent_harness.cli:cli"

@@ -12,7 +12,7 @@
   <p align="center">
     <a href="https://pypi.org/project/agentic-harness/"><img src="https://img.shields.io/pypi/v/agentic-harness" alt="PyPI"></a>
     <a href="https://pypi.org/project/agentic-harness/"><img src="https://img.shields.io/pypi/dm/agentic-harness" alt="Downloads"></a>
-    <a href="https://github.com/agentic-eng/agent-harness/actions/workflows/ci.yml"><img src="https://github.com/agentic-eng/agent-harness/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+    <a href="https://github.com/yoselabs/agent-harness/actions/workflows/ci.yml"><img src="https://github.com/yoselabs/agent-harness/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0"></a>
     <a href="https://python.org"><img src="https://img.shields.io/badge/python-3.12%2B-blue.svg" alt="Python 3.12+"></a>
   </p>
@@ -314,5 +314,5 @@ Apache 2.0 — see [LICENSE](LICENSE).
   <sub>🦎 Cold-blooded enforcement since mid 2025.</sub>
 </p>
 <p align="center">
-  <sub>Built by <a href="https://github.com/iorlas">Denis Tomilin</a> at <a href="https://github.com/agentic-eng">Agentic Engineering</a></sub>
+  <sub>Built by <a href="https://github.com/iorlas">Denis Tomilin</a> at <a href="https://github.com/yoselabs">Yose Labs</a></sub>
 </p>

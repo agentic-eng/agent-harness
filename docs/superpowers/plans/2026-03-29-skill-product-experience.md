@@ -435,7 +435,7 @@ Agent Harness enforces its own rules. We use agent-harness to develop agent-harn
 ## Development setup
 
 ```bash
-git clone https://github.com/agentic-eng/agent-harness
+git clone https://github.com/yoselabs/agent-harness
 cd agent-harness
 uv sync                          # install dev deps
 uv tool install -e .             # install CLI globally from source
