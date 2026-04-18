@@ -207,13 +207,13 @@ custom_policies:
 
 scores:
   setup:
-    total: 92
+    total: 88
     by_domain:
       docs: 100
       security: 100
-      vcs: 90
+      vcs: 75
       quality: 100
-      testing: 85
+      testing: 50
   quality:
     total: 67
     by_check_kind:
@@ -389,12 +389,12 @@ If all controls in a domain are Setup-unmet, that domain reports `n/a` for Quali
 ```
 agent-weiss audit complete
 
-SETUP SCORE: 92 / 100
+SETUP SCORE: 88 / 100
   ✓ docs (universal)        100   CLAUDE.md, AGENTS.md, README all present
   ✓ security (universal)    100   gitleaks + osv-scanner configured
-  ⚠ vcs (universal)          90   .gitignore complete, missing CODEOWNERS
-  ✓ quality (python)        100   ruff + ty configured
-  ⚠ testing (python)         85   pytest configured, coverage threshold missing
+  ⚠ vcs (universal)          75   3/4 controls met, missing CODEOWNERS
+  ✓ quality (python)        100   ruff + ty + formatter all configured
+  ⚠ testing (python)         50   1/2 controls met, coverage threshold missing
 
 QUALITY SCORE: 67 / 100
   ⚠ lint:    8 ruff issues in src/handlers/
