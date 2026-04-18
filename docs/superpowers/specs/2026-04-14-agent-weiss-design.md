@@ -431,7 +431,7 @@ A project can have **Setup 100, Quality 60** (perfectly configured but accumulat
 
 For each control:
 - **100** — control is satisfied (prescribed config in place, files present, override deliberately declared with reason)
-- **0** — control is unmet (missing files, missing config, tool not installed, or `check.sh` exited with Setup-unmet sentinel)
+- **0** — control is unmet (missing files, missing config, tool not installed, or `check.sh` exited with `setup-unmet` status (exit 127))
 
 Per-domain Setup score = average of its controls' scores.
 Total Setup score = average of per-domain scores. (All domains weighted equally in v1; configurable weighting deferred.)
@@ -442,7 +442,7 @@ Total Setup score = average of per-domain scores. (All domains weighted equally 
 
 For each control with a `check.sh`:
 - **100** — `check.sh` exited 0 (passing)
-- **0** — `check.sh` exited non-zero with a real failure (not the Setup-unmet sentinel)
+- **0** — `check.sh` exited non-zero with a real failure (not the `setup-unmet` status (exit 127))
 - **excluded from denominator** — control is Setup-unmet (we can't measure quality of an absent linter)
 
 Per-domain Quality score = average of its controls' Quality scores (excluding Setup-unmet controls).
