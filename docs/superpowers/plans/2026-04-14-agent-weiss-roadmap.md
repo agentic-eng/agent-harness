@@ -108,7 +108,7 @@ These are guidance, not gates:
 | 1 | **Foundations (MVP)** | Done | `2026-04-14-agent-weiss-foundations.md` | — |
 | 2 | Control Library Build-Out | Done | TBD | Plan 1 |
 | 3 | Setup Workflow & Approval UX | Done | TBD | Plan 1 |
-| 4 | Verify Workflow & Scoring | Pending | TBD | Plan 1 |
+| 4 | Verify Workflow & Scoring | Done | TBD | Plan 1 |
 | 5 | Distribution Packaging | Pending | TBD | Plans 1, 3, 4 |
 | 6 | Drift Refresh & Bundle Updates | Pending | TBD | Plans 1, 3, 4, 5 |
 
